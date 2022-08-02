@@ -10,9 +10,9 @@ typedef enum directive {
 
 directive str_to_directive(char* str);
 directive find_directive_type(line_details line, char* begin);
-void string_handler(line_details line, char* begin, int* DC, long* data_image);
-void data_handler(struct line_details line, char* begin, int* DC, long* data_image);
-void struct_handler(line_details line, char* begin, int* DC, long* data_image);
-
+void string_handler(line_details line, char* begin, int* DC, long** data_image_ptr);
+void data_handler(struct line_details line, char* begin, int* DC, long** data_image_ptr);
+void struct_handler(line_details line, char* begin, int* DC, long** data_image_ptr);
+bool is_directive(char* line);
 
 #endif /* DIRECTIVES_HANDLER_H_ */

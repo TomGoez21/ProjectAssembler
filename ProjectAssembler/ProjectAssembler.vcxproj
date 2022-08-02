@@ -139,16 +139,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="code_parse.c" />
     <ClCompile Include="directives.c" />
     <ClCompile Include="label_check.c" />
     <ClCompile Include="main.c" />
+    <ClCompile Include="oders.c" />
     <ClCompile Include="symbol_conversion.c" />
     <ClCompile Include="symbol_table.c" />
     <ClCompile Include="utils.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="code_parse.h" />
     <ClInclude Include="directives.h" />
     <ClInclude Include="label_check.h" />
+    <ClInclude Include="orders.h" />
     <ClInclude Include="symbol_conversion.h" />
     <ClInclude Include="symbol_table.h" />
     <ClInclude Include="utils.h" />

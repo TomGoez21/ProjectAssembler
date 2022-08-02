@@ -4,13 +4,57 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "label_check.h"
 #include "utils.h"
 
 #define MAX_LABEL_LENGTH 30
-#define NUM_DIRECTIVES 5
-#define NUM_ORDERS 16
-#define NUM_REGERSITERS 8
+
+char* directive_list[5] = { "data","string","struct","entry","extern" };
+char* order_list[16] = { "mov","cmp","add","sub","not","clr","lea","inc","dec","jmp","bne","get","prn","jsr","rts","hlt" };
+char* reg_list[8] = { "r0","r1","r2","r3","r4","r5","r6","r7" };
+
+
+/*extract order from text*/
+char* get_order(line_details line) {
+	int i;
+	int j;
+	int cmp;
+	char order[4] = { 0 };
+	while (isspace(*(line.line))) { ((line.line))++; }
+	for (int j = 0; line.line[j] != ' ' && line.line[j]; j++) {
+		order[j] = line.line[j];
+	}
+	for (i = 0; i < NUM_ORDERS; i++) {
+		cmp = strcmp(order, order_list[i]);
+		if (cmp == 0) {
+			return order;
+		}
+	}
+	return order;
+}
+
+/*check if text is one of the orders from order_list*/
+bool is_order(line_details line) {
+	int i;
+	int j;
+	int cmp;
+	char order[4] = { 0 };
+	while (isspace(*(line.line))) { ((line.line))++; }
+	for (int j = 0; line.line[j] != ' ' && line.line[j]; j++) {
+		order[j] = line.line[j];
+	}
+	for (i = 0; i < NUM_ORDERS; i++) {
+		cmp = strcmp(order, order_list[i]);
+		if (cmp == 0) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
 
 bool is_reserved_word(char* text) {
 	int i;
@@ -51,8 +95,25 @@ bool is_label_valid(char* text) {
 	is_valid_label &= (text[i] == ':');
 	is_valid_label &= !is_reserved_word(text);
 
-	printf("%d\n", is_valid_label);
 	return is_valid_label;
 }
 
 
+char* get_label(char* line) {
+	char* label;
+	label = (char*)malloc(30);
+	if (!label) {
+		// TODO: Print error
+		exit(1);
+	}
+
+	bool is_label = true;
+	while (isspace(*(line))) { (line)++; }
+	is_label = is_label_valid(line);
+	if (is_label) {
+		for (int i = 0; line[i] != ':'; i++) {
+			label[i] = line[i];
+		}
+	}
+	return label;
+}

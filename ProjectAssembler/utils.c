@@ -5,6 +5,7 @@
 #include <stdarg.h>
 #include "utils.h"
 
+
 #define _CRT_SECURE_NO_WARNINGS
 #pragma warning(disable : 4996)
 #define ERROR_FILE stderr
@@ -35,13 +36,32 @@ char* cat_str(char* str0, char* str1) {
 void* check_malloc(long size) {
 	void* ptr = malloc(size);
 	if (ptr == NULL) {
-		printf("Error: Fatal: Memory allocation failed.");
+		printf("Memory allocation failed.");
 		exit(1);
 	}
 	return ptr;
 }
 
+bool is_label(char* str) {
+	
+}
+
 int move_white_space(int index, char* string) {
 	for (; (string[(index)] == '\t' || string[(index)] == ' ') && (string[(index)]); (++(index)));
 	return index;
+}
+
+
+bool is_legal_num(char* text) {
+	int i = 0;
+	/* checks if text starts with + or -*/
+	if (text[0] == '-' || text[0] == '+') {
+		text++;
+	}
+	for (i; i <= (int)(strlen(text)); i++) {
+		if (isdigit(text[i])) {
+			return true;
+		}
+	}
+	return false;
 }

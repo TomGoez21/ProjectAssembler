@@ -18,5 +18,5 @@ typedef struct SymbolTable {
 	int size;
 } SymbolTable;
 
-
+void add_to_table(SymbolTable* table, SymbolTableEntry to_add);
 #endif

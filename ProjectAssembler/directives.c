@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdbool.h>
 #include "directives.h"
 #include "utils.h"
 #pragma warning(disable : 4996)
@@ -48,7 +49,7 @@ directive find_directive_type(line_details line, char* begin) {
 
 
 /*Handles string directive, 'begin' points to the first character*/
-void string_handler(line_details line, char* begin, int* DC, long* data_image) {
+void string_handler(line_details line, char* begin, int* DC, long** data_image_ptr) {
 	/* Checks if the string argument has leading quotation marks */
 	if (*begin++ != '"') {
 		printf_line_error(line, "String directive should start with quotation marks");
@@ -63,14 +64,17 @@ void string_handler(line_details line, char* begin, int* DC, long* data_image) {
 
 	/*insert data to the data list*/
 	while (*begin && *begin != '"') {
-		data_image[*DC] = *begin;
+		*data_image_ptr = (long*)realloc(data_image_ptr, (*DC + 1) * sizeof(long));
+		// TODO: check and print error
+		*data_image_ptr[*DC] = *begin;
 		begin++;
 		(*DC)++;
 	}
 
 	/* add \0 to the end of string in data image */
-	data_image[*DC] = '\0';
-
+	*data_image_ptr = (long*)realloc(data_image_ptr, (*DC + 1) * sizeof(long));
+	// TODO: check and print error
+	*data_image_ptr[*DC] = '\0';
 	(*DC)++;
 
 	if (*begin == '"') {
@@ -85,8 +89,8 @@ void string_handler(line_details line, char* begin, int* DC, long* data_image) {
 }
 
 /* Handles the data directive when begin points to the first argument */
-void data_handler(struct line_details line, char* begin, int* DC, long* data_image) {
-	int num; /* Current integer being read */
+void data_handler(line_details line, char* begin, int* DC, long** data_image_ptr) {
+	long num; /* Current integer being read */
 	int ilen; /* Characters length of the integer */
 
 	/* Get first argument from the string input */
@@ -102,7 +106,9 @@ void data_handler(struct line_details line, char* begin, int* DC, long* data_ima
 		return;
 	}
 	/* Insert the data into data_image */
-	data_image[*DC] = num;
+	*data_image_ptr = (long*)realloc(data_image_ptr, (*DC + 1) * sizeof(long));
+	// TODO: check and print error
+	*data_image_ptr[*DC] = num;
 	(*DC)++;
 
 
@@ -130,7 +136,9 @@ void data_handler(struct line_details line, char* begin, int* DC, long* data_ima
 		begin += ilen;
 
 		/* Insert the data into data_image */
-		data_image[*DC] = num;
+		*data_image_ptr = (long*)realloc(data_image_ptr, (*DC + 1) * sizeof(long));
+		// TODO: check and print error
+		*data_image_ptr[*DC] = num;
 		begin++;
 		(*DC)++;
 
@@ -140,7 +148,7 @@ void data_handler(struct line_details line, char* begin, int* DC, long* data_ima
 
 
 /* Handles the data directive when begin points to the first argument */
-void struct_handler(line_details line, char* begin, int* DC, long* data_image) {
+void struct_handler(line_details line, char* begin, int* DC, long** data_image_ptr) {
 	int num; /* Current integer being read */
 	int ilen; /* Characters length of the integer */
 
@@ -157,7 +165,9 @@ void struct_handler(line_details line, char* begin, int* DC, long* data_image) {
 		return;
 	}
 	/* Insert the data into data_image*/
-	data_image[*DC] = num;
+	*data_image_ptr = (long*)realloc(data_image_ptr, (*DC + 1) * sizeof(long));
+	// TODO: check and print error
+	*data_image_ptr[*DC] = num;
 	(*DC)++;
 
 
@@ -165,6 +175,24 @@ void struct_handler(line_details line, char* begin, int* DC, long* data_image) {
 	if (*begin == ',') {
 		begin++;
 		while (isspace(*begin)) { begin++; }
-		string_handler(line, begin, DC, data_image);
+		string_handler(line, begin, DC, data_image_ptr);
 	}
 }
+
+bool is_directive(char* line) {
+	bool is_directive = true;
+	while (isspace(*line)) { line++; }
+	if (*line++ == '.') {
+		if ((!strcmp(line, "data")) || (!strcmp(line, "string")) || (!strcmp(line, "struct")) || (!strcmp(line, "extern")) || (!strcmp(line, "entry"))) {
+			is_directive = true;
+			return is_directive;
+		}
+		else {
+			is_directive = false;
+			return is_directive;
+		}
+	}
+	is_directive = false;
+	return is_directive;
+}
+
