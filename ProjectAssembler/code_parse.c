@@ -41,14 +41,7 @@ addressing_type parse_operand_addressing_type(char *operand) {
 void validate_operand_addressing(char* operand, line_details line, addressing_type src_address, addressing_type dst_address) {
 	int i = 0;
 	int cmp;
-	/*
-	char op_to_enum[3] = { 0 };
-	while (operand[i]) {
-		op_to_enum[i] = toupper(operand[i]);
-		i++;
-	}
-	op_to_enum[i] = '\0';
-	*/
+
 	/*check if opcode in the first group of opcodes, which means it gets 2 operands./
 	there are 5 opcode in this group.*/
 	for (i = 0; i < 5; i++) {

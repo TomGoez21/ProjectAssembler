@@ -65,3 +65,28 @@ bool is_legal_num(char* text) {
 	}
 	return false;
 }
+
+
+/* Reads the first word of str, allocates memory for it and returns a copy of it */
+char* get_first_word(char* str) {
+	char* word; /* Points to the beginning of the copy of the word */
+	int w_len = 0; /* The word's length */
+	int allocated = INITIAL_ALLOCATED_SIZE; /* Number of allocated bytes */
+	word = (char*)malloc(allocated); /* Initial allocation */
+	if (!word) { /* Checks for successful allocation */
+		/*TODO: error*/
+	}
+	/* Read until whitespace, comma or EOF, copy contents into `word` */
+	while (*str && !isspace(*str) && *str != ',') {
+		/* If we ran out of space in `word`, make a reallocation with twice the size */
+		if (w_len >= allocated - 1) {
+			word = realloc(word, allocated *= 2);
+			if (!word) { /* Checks for successful allocation */
+				/*TODO: error*/
+			}
+		}
+		word[w_len++] = *str++;
+	}
+	word[w_len] = '\0';
+	return word;
+}

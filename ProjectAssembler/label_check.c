@@ -9,7 +9,6 @@
 #include "label_check.h"
 #include "utils.h"
 
-#define MAX_LABEL_LENGTH 30
 
 char* directive_list[5] = { "data","string","struct","entry","extern" };
 char* order_list[16] = { "mov","cmp","add","sub","not","clr","lea","inc","dec","jmp","bne","get","prn","jsr","rts","hlt" };
@@ -100,7 +99,7 @@ bool is_label_valid(char* text) {
 
 
 char* get_label(char* line) {
-	char* label;
+	char* label = { 0 };
 	label = (char*)malloc(30);
 	if (!label) {
 		// TODO: Print error
@@ -115,5 +114,6 @@ char* get_label(char* line) {
 			label[i] = line[i];
 		}
 	}
+	printf("label in function:%s", label);
 	return label;
 }

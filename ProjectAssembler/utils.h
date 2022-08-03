@@ -29,4 +29,6 @@ int printf_line_error(line_details line, char* error_message, ...);
 
 bool is_legal_num(char* text);
 
+char* get_first_word(char* str);
+
 #endif
