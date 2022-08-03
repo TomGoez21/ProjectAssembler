@@ -56,6 +56,11 @@ bool process_file(char* filename, SymbolTable* symboltable) {
 	while (fgets(line, MAX_LINE_LENGTH, file_dst)) {
 		printf("line[%06d]: %s", ++line_count, line);
 		line_handler(symboltable, line_count, line, input_file, &DC, &IC, &data_image, &code_image);
+		printf("\nDC:%d\n", DC);
+		printf("data_image:%l\n", data_image);
+		printf("IC:%d\n", IC);
+
+
 	}
 	printf("\nhandled all lines :)\n");
 
@@ -80,15 +85,23 @@ void line_handler(
 	char* index;
 
 /*gets a label. returns null if no label found*/
-	char* label = get_label(ld.line);
+	char* label = { 0 };
+	label = get_label(ld.line);
+	printf("\nlabel:%s\n", label);
+	printf("length label:%d\n", strlen(label));
+
+
 	/*continue to the next word*/
 	ld.line = ld.line + strlen(label) + 1;
 	while (isspace(*(ld.line))) { (ld.line)++; }
 
 	/*check whether it is one of .data, .struct, .string, .extern, .entry*/
 	if (is_directive(ld.line)) {
+		printf("\directive: %i\n", is_directive);
+
 		/*find what kind of directive it is*/
 		directive directive_type = find_directive_type(ld, ld.line);
+
 		if (label) {
 			if (directive_type == _string || directive_type == _data || directive_type == _struct) {
 				line_to_table->counter = *DC;
