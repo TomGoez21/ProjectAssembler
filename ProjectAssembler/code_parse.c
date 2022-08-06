@@ -69,6 +69,9 @@ addressing_type parse_operand_addressing_type(long* L, line_details line, char* 
 		printf("true\n");
 		*L += 2;
 		/*adding the label of the struct operand to code_image*/
+		
+		/* TODO: strncpy(code_image_ptr[*IC], label_name, sizeof(label_name));*/
+
 		code_image_ptr[*IC] = *label_name;
 		printf(" code in IC place: %c\n", code_image_ptr[*IC]);
 		printf(" IC: %d\n", *IC);
