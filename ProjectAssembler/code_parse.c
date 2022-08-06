@@ -24,19 +24,19 @@ int operands_check(line_details line, long** code_image_ptr, long *IC) {
 }
 
 /*determine the type of addressing. also add to the word counter L*/
-addressing_type parse_operand_addressing_type(long* L, line_details line, char* operand) {
+addressing_type parse_operand_addressing_type(long* L, line_details line, char* operand, long** code_image_ptr, long* IC) {
 	int i;
 	char* label_name = NULL;
 	char* operand_cpy = NULL;
 	operand_cpy = (char*)malloc(80);
 	label_name = (char*)malloc(30);
 	strcpy(operand_cpy, operand);
-	/*get label name, it exists*/
+	/*get label name, if exists*/
 	for (i = 0; operand[i] != '.' && operand[i]; i++) {
 		label_name[i] = operand[i];
 	}
 	label_name[i] = '\0';
-	printf("label name is: %s", label_name);
+	printf("label name is: %s\n", label_name);
 	/*advance the pointer to point after the label*/
 	operand_cpy += strlen(label_name);
 
@@ -44,6 +44,11 @@ addressing_type parse_operand_addressing_type(long* L, line_details line, char* 
 	if (operand[0] == '#' && is_legal_num(operand + 1)) {
 		printf("true\n");
 		*L += 1;
+		/*adding the immediate operand to code_image*/
+		code_image_ptr[*IC] = *(operand+1);
+		printf(" code in IC place: %c\n", code_image_ptr[*IC]);
+		printf(" IC: %d\n", *IC);
+		(*IC)++;
 		return IMMEDIATE_ADD;
 	}
 
@@ -51,6 +56,11 @@ addressing_type parse_operand_addressing_type(long* L, line_details line, char* 
 	if (operand[0] == 'r' && operand[1] >= '0' && operand[1] <= '7' && operand[2] == '\0') {
 		printf("true\n");
 		*L += 1;
+		/*adding the register operand to code_image*/
+		code_image_ptr[*IC] = *(operand);
+		printf(" code in IC place: %c\n", code_image_ptr[*IC]);
+		printf(" IC: %d\n", *IC);
+		(*IC)++;
 		return REGISTER_ADD;
 	}
 
@@ -58,6 +68,16 @@ addressing_type parse_operand_addressing_type(long* L, line_details line, char* 
 	if (is_label_valid_in_struct(line, operand) && (*(operand_cpy) == '.') && ((*(operand_cpy + 1) == '1') || (*(operand_cpy + 1) == '2'))) {
 		printf("true\n");
 		*L += 2;
+		/*adding the label of the struct operand to code_image*/
+		code_image_ptr[*IC] = *(label_name);
+		printf(" code in IC place: %c\n", code_image_ptr[*IC]);
+		printf(" IC: %d\n", *IC);
+		(*IC)++;
+		/*adding the strcut index to code_image*/
+		code_image_ptr[*IC] = *(operand_cpy + 1);
+		printf(" code in IC place: %c\n", code_image_ptr[*IC]);
+		printf(" IC: %d\n", *IC);
+		(*IC)++;
 		return STRUCT_ADD;
 	}
 
@@ -66,6 +86,11 @@ addressing_type parse_operand_addressing_type(long* L, line_details line, char* 
 	if (is_label_valid_in_text(line, operand)) {
 		printf("true\n");
 		*L += 1;
+		/*adding the label operand to code_image*/
+		code_image_ptr[*IC] = *(operand);
+		printf(" code in IC place: %c\n", code_image_ptr[*IC]);
+		printf(" IC: %d\n", *IC);
+		(*IC)++;
 		return DIRECT_ADD;
 	}
 
@@ -75,7 +100,7 @@ addressing_type parse_operand_addressing_type(long* L, line_details line, char* 
 
 
 
-void validate_operand_addressing(long* L_ptr, line_details line, addressing_type src_address, addressing_type dst_address, char* src_oper, char* dst_oper) {
+void validate_operand_addressing(long* L_ptr, line_details line, addressing_type src_address, addressing_type dst_address, char* src_oper, char* dst_oper, long** code_image_ptr, long* IC) {
 	int i = 0;
 	int cmp;
 	char* oper = { 0 };
@@ -111,9 +136,9 @@ void validate_operand_addressing(long* L_ptr, line_details line, addressing_type
 		cmp = strcmp(oper, first_order_group[i]);
 		if (cmp == 0) {
 			printf("first group\n");
-			src_address = parse_operand_addressing_type(L_ptr, line, src_oper);
+			src_address = parse_operand_addressing_type(L_ptr, line, src_oper, code_image_ptr, IC);
 			printf("src_add type:%d\n", src_address);
-			dst_address = parse_operand_addressing_type(L_ptr, line, dst_oper);
+			dst_address = parse_operand_addressing_type(L_ptr, line, dst_oper, code_image_ptr, IC);
 			printf("dst_add type:%d\n", dst_address);
 
 			return;
@@ -125,7 +150,7 @@ void validate_operand_addressing(long* L_ptr, line_details line, addressing_type
 		cmp = strcmp(oper, second_order_group[i]);
 		if (cmp == 0) {
 			printf("second");
-			src_address = parse_operand_addressing_type(L_ptr, line, src_oper);
+			src_address = parse_operand_addressing_type(L_ptr, line, src_oper, code_image_ptr, IC);
 			/*no dst address*/
 			dst_address = 4;
 			return;

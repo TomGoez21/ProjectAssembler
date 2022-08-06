@@ -107,8 +107,8 @@ void data_handler(line_details line, char* begin, long *DC, long** data_image_pt
 		return;
 	}
 	begin += ilen;
-
 	while (isspace(*begin)) { begin++; }
+
 	if (*begin != ',' && *begin) {
 		printf_line_error(line, "not an integer");
 		return;
@@ -119,14 +119,13 @@ void data_handler(line_details line, char* begin, long *DC, long** data_image_pt
 	data_image_ptr[*DC] = num;
 	(*DC)++;
 
-
-	/* For each argument the the .data directive, add it to data_image */
+	/* for each argument the the .data directive, add it to data_image */
 	while (*begin == ',') {
 		begin++;
 
 		while (isspace(*begin)) { begin++; }
 
-		/* Gets argument */
+		/* get argument */
 		if (!sscanf(begin, "%d%n", &num, &ilen)) {
 			printf_line_error(line, "Expected a number after comma");
 			return;
@@ -141,13 +140,11 @@ void data_handler(line_details line, char* begin, long *DC, long** data_image_pt
 			printf_line_error(line, "not an integer");
 			return;
 		}
-		begin += ilen;
 
 		/* Insert the data into data_image */
 		/**data_image_ptr = (long*)realloc(data_image_ptr, (*DC + 1) * sizeof(long));*/
 		/*TODO: checkand print error*/
 		data_image_ptr[*DC] = num;
-		begin++;
 		(*DC)++;
 
 		while (isspace(*begin)) { begin++; }

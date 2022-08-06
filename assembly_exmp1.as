@@ -9,6 +9,6 @@ LOOP: jmp END
  bne LOOP 
 END: hlt 
 STR: .string "abcdef" 
-LENGTH: .data 6,-9,15 
+LENGTH: .data 6,-9,15,30 
 K: .data 22 
 S1: .struct 8, "ab"

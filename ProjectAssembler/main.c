@@ -47,7 +47,7 @@ bool process_file(char* filename, SymbolTable* symboltable) {
 	/*long* data_image = (long*)calloc(1, sizeof(long));
 	long* code_image = (long*)calloc(1, sizeof(long));*/
 	long* data_image[MAX_DATA_IMAGE_LENGTH] = {0};
-	long* code_image[MAX_CODE_IMAGE_LENGTH] = { 0 };
+	long* code_image[MAX_CODE_IMAGE_LENGTH] = {0};
 	unsigned int line_count = 0;
 	FILE* file_dst; /* Current assembly file descriptor to process */
 	char* input_file;
@@ -71,7 +71,12 @@ bool process_file(char* filename, SymbolTable* symboltable) {
 		/*printf("data_image:%l\n", data_image);*/
 		printf("IC:%ld\n", IC);
 
-
+	}
+	for (int i = 0; i < IC; i++) {
+		printf("code image: %c\n", code_image[i]);
+	}
+	for (int i = 0; i < DC; i++) {
+		printf("data_image: %d\n", data_image[i]);
 	}
 	printf("\nhandled all lines :)\n");
 
@@ -159,11 +164,10 @@ void line_handler(
 		/*check if word is order from the order_list. If so, analyze the operands*/
 		if (is_order(ld)) {
 			/* check the structre of the order. return number of words this code is translated to*/
-			validate_operand_addressing(&L, ld, src_address, dst_address, src_oper, dst_oper, code_image_ptr);
+			validate_operand_addressing(&L, ld, src_address, dst_address, src_oper, dst_oper, code_image_ptr, IC);
 		
 			/*int L = operands_check(ld, code_image_ptr, IC);
 			binary_conversion_to_base_32(line, IC);*/
-			*IC += L;
 			/*TO DO: using the final value of IC to detemrine the value of the data symbols*/
 		}
 	}

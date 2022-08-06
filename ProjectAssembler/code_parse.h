@@ -29,8 +29,8 @@ typedef struct binary_line {
 
 int operands_check(line_details line, long** code_image_ptr, long *IC);
 
-addressing_type parse_operand_addressing_type(long* L, line_details line, char* operand);
+addressing_type parse_operand_addressing_type(long* L, line_details line, char* operand, long** code_image_ptr, long* IC);
 
-void validate_operand_addressing(long* L, line_details line, addressing_type src_address, addressing_type dst_address, char* src_oper, char* dst_oper);
+void validate_operand_addressing(long* L_ptr, line_details line, addressing_type src_address, addressing_type dst_address, char* src_oper, char* dst_oper, long** code_image_ptr, long* IC);
 
 #endif

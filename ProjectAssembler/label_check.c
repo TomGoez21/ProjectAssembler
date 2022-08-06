@@ -140,6 +140,17 @@ bool is_label_valid_in_text(line_details line, char* text) {
 	return is_valid_label;
 }
 
+/*get the label name when in struct. comes after validation of the label*/
+char* get_label_in_struct(char* text, char* label_name) {
+	int i;
+	/*check each char in the string if it is non alphanumeric char*/
+	for (i = 0; text[i] != '.' && text[i]; i++) {
+		label_name[i] = text[i];
+	}
+	label_name[i] = '\0';
+	return label_name;
+
+}
 
 
 char* get_label(line_details line) {
