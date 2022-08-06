@@ -69,7 +69,7 @@ addressing_type parse_operand_addressing_type(long* L, line_details line, char* 
 		printf("true\n");
 		*L += 2;
 		/*adding the label of the struct operand to code_image*/
-		code_image_ptr[*IC] = *(label_name);
+		code_image_ptr[*IC] = *label_name;
 		printf(" code in IC place: %c\n", code_image_ptr[*IC]);
 		printf(" IC: %d\n", *IC);
 		(*IC)++;
@@ -110,6 +110,13 @@ void validate_operand_addressing(long* L_ptr, line_details line, addressing_type
 	printf("the first: %s\n", oper);
 	/*add +1 to L because of opcode*/
 	*L_ptr += 1;
+
+	/*add operand to code_image*/
+	code_image_ptr[*IC] = *oper;
+	printf(" code in IC place: %c\n", code_image_ptr[*IC]);
+	printf(" IC: %d\n", *IC);
+	(*IC)++;
+
 	line.line += strlen(oper);
 	while (isspace(*(line.line))) { ((line.line))++; }
 
