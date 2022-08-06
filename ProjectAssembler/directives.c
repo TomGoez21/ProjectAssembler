@@ -109,7 +109,7 @@ void data_handler(line_details line, char* begin, long *DC, long** data_image_pt
 	begin += ilen;
 
 	while (isspace(*begin)) { begin++; }
-	if (*begin != ',') {
+	if (*begin != ',' && *begin) {
 		printf_line_error(line, "not an integer");
 		return;
 	}

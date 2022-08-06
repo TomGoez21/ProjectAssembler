@@ -14,6 +14,8 @@ typedef struct line_details {
 	char* line;
 } line_details;
 
+
+
 char* cat_str(char* str0, char* str1);
 
 void* check_malloc(long size);

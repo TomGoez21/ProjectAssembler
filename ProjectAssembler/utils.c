@@ -15,7 +15,7 @@ int printf_line_error(line_details line, char* error_message, ...) {
 	int result;
 	va_list ap;
 	/*prints to ERROR_FILE the relevant line number, file name.*/
-	fprintf(ERROR_FILE, "Error in %s line %ld: ", line.file_name, line.line_number);
+	fprintf(ERROR_FILE, "\nError in %s line %ld: \n", line.file_name, line.line_number);
 	/*prints the wanted error*/
 	va_start(ap, error_message);
 	result = vfprintf(ERROR_FILE, error_message, ap);

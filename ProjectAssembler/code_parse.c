@@ -23,8 +23,8 @@ int operands_check(line_details line, long** code_image_ptr, long *IC) {
 	return 0;
 }
 
-
-addressing_type parse_operand_addressing_type(line_details line, char* operand) {
+/*determine the type of addressing. also add to the word counter L*/
+addressing_type parse_operand_addressing_type(long* L, line_details line, char* operand) {
 	int i;
 	char* label_name = NULL;
 	char* operand_cpy = NULL;
@@ -43,33 +43,39 @@ addressing_type parse_operand_addressing_type(line_details line, char* operand) 
 	/*check if it is immediate addressing*/
 	if (operand[0] == '#' && is_legal_num(operand + 1)) {
 		printf("true\n");
+		*L += 1;
 		return IMMEDIATE_ADD;
-	}
-
-	/*check if it is struct addressing*/
-	if (is_label_valid_in_struct(line, operand) && (*(operand_cpy) == '.') && ((*(operand_cpy + 1) == '1') || (*(operand_cpy + 1) == '2'))) {
-		printf("true\n");
-		return STRUCT_ADD;
-	}
-
-	/*check if it is direct addressing*/
-	if (is_label_valid_in_text(line, operand)) {
-		printf("true\n");
-		return DIRECT_ADD;
 	}
 
 	/*check if it is register addressing*/
 	if (operand[0] == 'r' && operand[1] >= '0' && operand[1] <= '7' && operand[2] == '\0') {
 		printf("true\n");
+		*L += 1;
 		return REGISTER_ADD;
 	}
+
+	/*check if it is struct addressing*/
+	if (is_label_valid_in_struct(line, operand) && (*(operand_cpy) == '.') && ((*(operand_cpy + 1) == '1') || (*(operand_cpy + 1) == '2'))) {
+		printf("true\n");
+		*L += 2;
+		return STRUCT_ADD;
+	}
+
+
+	/*check if it is direct addressing*/
+	if (is_label_valid_in_text(line, operand)) {
+		printf("true\n");
+		*L += 1;
+		return DIRECT_ADD;
+	}
+
 	else
 		return NONE;
 }
 
 
 
-void validate_operand_addressing(line_details line, addressing_type src_address, addressing_type dst_address, char* src_oper, char* dst_oper) {
+void validate_operand_addressing(long* L_ptr, line_details line, addressing_type src_address, addressing_type dst_address, char* src_oper, char* dst_oper) {
 	int i = 0;
 	int cmp;
 	char* oper = { 0 };
@@ -77,7 +83,8 @@ void validate_operand_addressing(line_details line, addressing_type src_address,
 	/*get the operator name*/
 	oper = get_first_word(line.line);
 	printf("the first: %s\n", oper);
-	printf("the first: %d\n", strlen(oper));
+	/*add +1 to L because of opcode*/
+	*L_ptr += 1;
 	line.line += strlen(oper);
 	while (isspace(*(line.line))) { ((line.line))++; }
 
@@ -104,9 +111,9 @@ void validate_operand_addressing(line_details line, addressing_type src_address,
 		cmp = strcmp(oper, first_order_group[i]);
 		if (cmp == 0) {
 			printf("first group\n");
-			src_address = parse_operand_addressing_type(line, src_oper);
+			src_address = parse_operand_addressing_type(L_ptr, line, src_oper);
 			printf("src_add type:%d\n", src_address);
-			dst_address = parse_operand_addressing_type(line, dst_oper);
+			dst_address = parse_operand_addressing_type(L_ptr, line, dst_oper);
 			printf("dst_add type:%d\n", dst_address);
 
 			return;
@@ -118,7 +125,7 @@ void validate_operand_addressing(line_details line, addressing_type src_address,
 		cmp = strcmp(oper, second_order_group[i]);
 		if (cmp == 0) {
 			printf("second");
-			src_address = parse_operand_addressing_type(line, src_oper);
+			src_address = parse_operand_addressing_type(L_ptr, line, src_oper);
 			/*no dst address*/
 			dst_address = 4;
 			return;
@@ -137,3 +144,7 @@ void validate_operand_addressing(line_details line, addressing_type src_address,
 		}
 	}
 }
+/*
+void first_word_code(line_details line, char *operand, addressing_type src_address, addressing_type dst_address) {
+
+}*/

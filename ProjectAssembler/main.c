@@ -71,6 +71,7 @@ bool process_file(char* filename, SymbolTable* symboltable) {
 		/*printf("data_image:%l\n", data_image);*/
 		printf("IC:%ld\n", IC);
 
+
 	}
 	printf("\nhandled all lines :)\n");
 
@@ -86,6 +87,8 @@ void line_handler(
 	long** data_image_ptr,
 	long** code_image_ptr
 ) {
+	/*L is number of code words in a line*/
+	long L = 0;
 	line_details ld;
 	addressing_type src_address = NONE;
 	addressing_type dst_address = NONE;
@@ -156,10 +159,11 @@ void line_handler(
 		/*check if word is order from the order_list. If so, analyze the operands*/
 		if (is_order(ld)) {
 			/* check the structre of the order. return number of words this code is translated to*/
-			validate_operand_addressing(ld, src_address, dst_address, src_oper, dst_oper);
+			validate_operand_addressing(&L, ld, src_address, dst_address, src_oper, dst_oper, code_image_ptr);
+		
 			/*int L = operands_check(ld, code_image_ptr, IC);
-			binary_conversion_to_base_32(line, IC);
-			IC += L;*/
+			binary_conversion_to_base_32(line, IC);*/
+			*IC += L;
 			/*TO DO: using the final value of IC to detemrine the value of the data symbols*/
 		}
 	}
