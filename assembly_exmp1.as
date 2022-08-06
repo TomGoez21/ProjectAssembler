@@ -1,4 +1,4 @@
-MAIN: mov S1.1 ,LENGTH 
+MAIN: mov S1.1 ,bne 
  add r2,STR 
 LOOP: jmp END 
 	 prn #-5 
@@ -11,4 +11,4 @@ END: hlt
 STR: .string "abcdef" 
 LENGTH: .data 6,-9,15 
 K: .data 22 
-S1: .struct 8, "ab" 
+S1: .struct 8, "ab"

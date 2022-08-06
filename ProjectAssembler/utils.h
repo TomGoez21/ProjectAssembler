@@ -18,7 +18,7 @@ char* cat_str(char* str0, char* str1);
 
 void* check_malloc(long size);
 
-//bool is_reserved_word(char* name);
+/*bool is_reserved_word(char* name);*/
 
 bool is_label(char* str);
 
@@ -30,5 +30,6 @@ int printf_line_error(line_details line, char* error_message, ...);
 bool is_legal_num(char* text);
 
 char* get_first_word(char* str);
+
 
 #endif

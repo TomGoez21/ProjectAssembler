@@ -3,7 +3,7 @@
 
 
 typedef enum label_type {
-	_DATA, _CODE, _EXTERN, _ENTRY
+	_DATA, _CODE, _EXTERN, _ENTRY, _NO_TYPE
 } label_type;
 
 typedef struct SymbolTableEntry {

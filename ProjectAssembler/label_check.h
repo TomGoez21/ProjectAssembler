@@ -5,8 +5,10 @@
 
 char* get_order(line_details line);
 bool is_order(line_details line);
-bool is_reserved_word(char* text);
-bool is_label_valid(char* text);
-char* get_label(char* line);
+bool is_reserved_word(line_details line, char* text);
+bool is_label_valid(line_details line, char* text);
+bool is_label_valid_in_struct(line_details line, char* text);
+bool is_label_valid_in_text(line_details line,char* text);
+char* get_label(line_details line);
 
 #endif /* LABEL_CHECK_H_ */

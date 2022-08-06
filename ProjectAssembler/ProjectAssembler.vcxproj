@@ -153,6 +153,7 @@
     <ClInclude Include="directives.h" />
     <ClInclude Include="label_check.h" />
     <ClInclude Include="orders.h" />
+    <ClInclude Include="string_utils.h" />
     <ClInclude Include="symbol_conversion.h" />
     <ClInclude Include="symbol_table.h" />
     <ClInclude Include="utils.h" />

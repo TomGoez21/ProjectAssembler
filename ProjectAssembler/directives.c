@@ -28,8 +28,7 @@ directive str_to_directive(char* str) {
 }
 
 /*Checks type of directive*/
-directive find_directive_type(line_details line, char* begin) {
-	char dir[10] = { 0 };
+directive find_directive_type(line_details line, char* begin, char *directive_string) {
 	while (isspace(*begin)) { begin++; }
 	if (*begin++ != '.') {
 		printf_line_error(line, "directive should start with period");
@@ -37,11 +36,11 @@ directive find_directive_type(line_details line, char* begin) {
 	}
 
 	int space_index = strcspn(begin, " ");
-	strncpy(dir, begin, space_index);
+	strncpy(directive_string, begin, space_index);
 
-	directive d = str_to_directive(dir);
+	directive d = str_to_directive(directive_string);
 	if (d == _invalid) {
-		printf_line_error(line, "invalid directive %s", dir);
+		printf_line_error(line, "invalid directive %s", directive_string);
 	}
 	return d;
 
@@ -49,7 +48,8 @@ directive find_directive_type(line_details line, char* begin) {
 
 
 /*Handles string directive, 'begin' points to the first character*/
-void string_handler(line_details line, char* begin, int* DC, long** data_image_ptr) {
+void string_handler(line_details line, char* begin, long *DC, long** data_image_ptr) {
+	while (isspace(*begin)) { begin++; }
 	/* Checks if the string argument has leading quotation marks */
 	if (*begin++ != '"') {
 		printf_line_error(line, "String directive should start with quotation marks");
@@ -64,17 +64,24 @@ void string_handler(line_details line, char* begin, int* DC, long** data_image_p
 
 	/*insert data to the data list*/
 	while (*begin && *begin != '"') {
-		*data_image_ptr = (long*)realloc(data_image_ptr, (*DC + 1) * sizeof(long));
-		// TODO: check and print error
-		*data_image_ptr[*DC] = *begin;
+		/*printf("*DC=%d *data_image_ptr=%x, value of data_image = %s\n", *DC, *data_image_ptr, *data_image_ptr);*/
+		/**data_image_ptr = (long*)realloc(*data_image_ptr, (*DC + 1) * sizeof(long));
+		if (!(*data_image_ptr)) {
+			printf_line_error(line, "unable to reallocate memory for data_image");
+		}
+		*/
+
+		data_image_ptr[*DC] = *begin;
+		printf(" data in DC place: %c\n", data_image_ptr[*DC]);
+		printf(" DC: %d\n", *DC);
 		begin++;
 		(*DC)++;
 	}
 
 	/* add \0 to the end of string in data image */
-	*data_image_ptr = (long*)realloc(data_image_ptr, (*DC + 1) * sizeof(long));
-	// TODO: check and print error
-	*data_image_ptr[*DC] = '\0';
+	/**data_image_ptr = (long*)realloc(data_image_ptr, (*DC + 1) * sizeof(long));*/
+	/*TODO: checkand print error*/
+	data_image_ptr[*DC] = '\0';
 	(*DC)++;
 
 	if (*begin == '"') {
@@ -89,9 +96,10 @@ void string_handler(line_details line, char* begin, int* DC, long** data_image_p
 }
 
 /* Handles the data directive when begin points to the first argument */
-void data_handler(line_details line, char* begin, int* DC, long** data_image_ptr) {
+void data_handler(line_details line, char* begin, long *DC, long** data_image_ptr) {
 	long num; /* Current integer being read */
 	int ilen; /* Characters length of the integer */
+	while (isspace(*begin)) { begin++; }
 
 	/* Get first argument from the string input */
 	if (sscanf(begin, "%d%n", &num, &ilen) <= 0) {
@@ -106,9 +114,9 @@ void data_handler(line_details line, char* begin, int* DC, long** data_image_ptr
 		return;
 	}
 	/* Insert the data into data_image */
-	*data_image_ptr = (long*)realloc(data_image_ptr, (*DC + 1) * sizeof(long));
-	// TODO: check and print error
-	*data_image_ptr[*DC] = num;
+	/**data_image_ptr = (long*)realloc(data_image_ptr, (*DC + 1) * sizeof(long));*/
+	/*TODO: checkand print error*/
+	data_image_ptr[*DC] = num;
 	(*DC)++;
 
 
@@ -136,9 +144,9 @@ void data_handler(line_details line, char* begin, int* DC, long** data_image_ptr
 		begin += ilen;
 
 		/* Insert the data into data_image */
-		*data_image_ptr = (long*)realloc(data_image_ptr, (*DC + 1) * sizeof(long));
-		// TODO: check and print error
-		*data_image_ptr[*DC] = num;
+		/**data_image_ptr = (long*)realloc(data_image_ptr, (*DC + 1) * sizeof(long));*/
+		/*TODO: checkand print error*/
+		data_image_ptr[*DC] = num;
 		begin++;
 		(*DC)++;
 
@@ -148,10 +156,10 @@ void data_handler(line_details line, char* begin, int* DC, long** data_image_ptr
 
 
 /* Handles the data directive when begin points to the first argument */
-void struct_handler(line_details line, char* begin, int* DC, long** data_image_ptr) {
+void struct_handler(line_details line, char* begin, long *DC, long** data_image_ptr) {
 	int num; /* Current integer being read */
 	int ilen; /* Characters length of the integer */
-
+	while (isspace(*begin)) { begin++; }
 	/* Get first argument from the string input */
 	if (sscanf(begin, "%d%n", &num, &ilen) <= 0) {
 		printf_line_error(line, "expected number after .struct");
@@ -165,9 +173,9 @@ void struct_handler(line_details line, char* begin, int* DC, long** data_image_p
 		return;
 	}
 	/* Insert the data into data_image*/
-	*data_image_ptr = (long*)realloc(data_image_ptr, (*DC + 1) * sizeof(long));
-	// TODO: check and print error
-	*data_image_ptr[*DC] = num;
+	/**data_image_ptr = (long*)realloc(data_image_ptr, (*DC + 1) * sizeof(long));*/
+	/*TODO: checkand print error*/
+	data_image_ptr[*DC] = num;
 	(*DC)++;
 
 
@@ -183,13 +191,21 @@ bool is_directive(char* line) {
 	bool is_directive = true;
 	while (isspace(*line)) { line++; }
 	if (*line++ == '.') {
-		if ((!strcmp(line, "data")) || (!strcmp(line, "string")) || (!strcmp(line, "struct")) || (!strcmp(line, "extern")) || (!strcmp(line, "entry"))) {
-			is_directive = true;
-			return is_directive;
-		}
-		else {
-			is_directive = false;
-			return is_directive;
+		char* copied_directive;
+		char *delim = " ";
+		/*char* copied_line = (char*)malloc(80);*/
+		char copied_line[80];
+		strcpy(copied_line, line);
+		copied_directive = strtok(copied_line, delim);
+		if (copied_directive) {
+			if ((!strcmp(copied_directive, "data")) || (!strcmp(copied_directive, "string")) || (!strcmp(copied_directive, "struct")) || (!strcmp(copied_directive, "extern")) || (!strcmp(copied_directive, "entry"))) {
+				is_directive = true;
+				return is_directive;
+			}
+			else {
+				is_directive = false;
+				return is_directive;
+			}
 		}
 	}
 	is_directive = false;

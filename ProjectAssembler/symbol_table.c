@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include "symbol_table.h"
 
+
+
 bool label_exists(SymbolTable* table, SymbolTableEntry* to_add) {
 	int i;
 	for (i = 0; i < table->size; ++i) {
@@ -16,11 +18,11 @@ bool label_exists(SymbolTable* table, SymbolTableEntry* to_add) {
 
 void add_to_table(SymbolTable* table, SymbolTableEntry to_add) {
 	if (label_exists(table, &to_add)) {
-		printf("Exists"); // TODO: print row number and indicitive error
+		printf("Exists"); /*TODO: print row numberand indicitive error*/ 
 	}
 	table->size++;
 	if (!table->entries) {
-		// First add:
+		/*First add :*/ 
 		table->entries = (SymbolTableEntry*)malloc(table->size * sizeof(SymbolTableEntry)); /* Initial allocation */
 	}
 	else {
@@ -38,6 +40,6 @@ void add_to_table(SymbolTable* table, SymbolTableEntry to_add) {
 
 
 
-/*SymbolTableEntry construct_entry(char* text, int IC, int DC) {
+/*SymbolTableEntry construct_entry(char* text, long IC, long DC) {
 
 }*/
