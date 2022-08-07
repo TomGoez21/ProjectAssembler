@@ -22,7 +22,7 @@ char* get_order(line_details line) {
 	int cmp;
 	char order[4] = { 0 };
 	while (isspace(*(line.line))) { ((line.line))++; }
-	for (int j = 0; line.line[j] != ' ' && line.line[j]; j++) {
+	for (j = 0; line.line[j] != ' ' && line.line[j]; j++) {
 		order[j] = line.line[j];
 	}
 	for (i = 0; i < NUM_ORDERS; i++) {
@@ -41,7 +41,7 @@ bool is_order(line_details line) {
 	int cmp = 0;
 	char order[5] = { 0 };
 	while (isspace(*(line.line))) { ((line.line))++; }
-	for (int j = 0; line.line[j] != ' ' && line.line[j]; j++) {
+	for (j = 0; line.line[j] != ' ' && line.line[j]; j++) {
 		order[j] = line.line[j];
 	}
 	for (i = 0; i < NUM_ORDERS; i++) {

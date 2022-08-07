@@ -9,6 +9,8 @@
 #include "label_check.h"
 #include "orders.h"
 #include "code_parse.h"
+#include "string_utils.h"
+#include "macro.h"
 
 
 
@@ -19,7 +21,8 @@ char line[MAX_LINE_LENGTH] = { 0 };
 #pragma warning(disable : 4996)
 
 static bool process_file(char* filename, SymbolTable* symboltable);
-void line_handler(SymbolTable* symboltable, int line_count, char* line, char* file_name, long *DC, long *IC, long** data_image_ptr, long** code_image_ptr);
+char *preAssemblerProccess(char *filename);
+void line_handler(SymbolTable* symboltable, int line_count, char* line, char* file_name, long *DC, long *IC, long** data_image_ptr, long** code_image_ptr); 
 
 int main(int argc, char* argv[]) {
 	int i;
@@ -33,6 +36,7 @@ int main(int argc, char* argv[]) {
 	for (i = 1; i < argc; ++i) {
 		/* if last process failed and there's another file, break line: */
 		if (!succeeded) puts("");
+		argv[i] = preAssemblerProccess(argv[i]);
 		/* for each file name, send it for full processing. */
 		succeeded = process_file(argv[i], &symboltable);
 		/* Line break if failed */
@@ -63,19 +67,26 @@ bool process_file(char* filename, SymbolTable* symboltable) {
 		free(input_file); /* The only allocated space is for the full file name */
 		return false;
 	}
+
+
 	while (fgets(line, MAX_LINE_LENGTH, file_dst)) {
 		printf("-------------\n");
 		printf("line[%06d]: %s", ++line_count, line);
+		if(isEmetyLine(line) || isCommnetLine(line)){
+			continue;
+		}
 		line_handler(symboltable, line_count, line, input_file, &DC, &IC, &data_image, &code_image);
 		printf("\nDC:%ld\n", DC);
 		/*printf("data_image:%l\n", data_image);*/
 		printf("IC:%ld\n", IC);
 
 	}
-	for (int i = 0; i < IC; i++) {
+	int i =0;
+	for (; i < IC; i++) {
 		printf("code image: %c\n", code_image[i]);
 	}
-	for (int i = 0; i < DC; i++) {
+	i=0;
+	for (; i < DC; i++) {
 		printf("data_image: %d\n", data_image[i]);
 	}
 	printf("\nhandled all lines :)\n");
@@ -100,7 +111,6 @@ void line_handler(
 	char* src_oper = NULL;
 	char* dst_oper = NULL;
 	SymbolTableEntry* line_to_table = malloc(sizeof(SymbolTableEntry));
-
 	ld.line_number = line_count;
 	ld.file_name = file_name;
 	ld.line = line;
@@ -171,7 +181,80 @@ void line_handler(
 			/*TO DO: using the final value of IC to detemrine the value of the data symbols*/
 		}
 	}
-
-
 	
+}
+
+char *preAssemblerProccess(char *filename)
+{
+	FILE *fd;
+	char line[MAX_LINE_LENGTH];
+	char currWord[MAX_LINE_LENGTH];
+	int macroFlag = 0;
+	char macroBuffer[MAX_LINE_LENGTH];
+	char macroName[MAX_LINE_LENGTH];
+	int linesToPass = 0;
+	char *foundedMacroVal;
+	char *newFile = malloc(MAX_LINE_LENGTH * sizeof(char));
+	if (!(fd = fopen(filename, "r+")))
+	{
+		fprintf(stderr, "cannot  open file\n");
+		exit(-10);
+	}
+	macroList *list = createNewMacroList();
+	while (!feof(fd))
+	{
+		if (fgets(line, MAX_LINE_LENGTH, fd) != NULL)
+		{
+			strcpy(currWord, getFirstWordFromALine(line, currWord));
+			if (macroFlag)
+			{
+				if (!isEndMacroLabel(currWord))
+				{
+					linesToPass++;
+					strncat(macroBuffer, line, MAX_LINE_LENGTH);
+					continue;
+				}
+				else
+				{
+					AddToMacroList(createNewMacro(macroName, macroBuffer), &list);
+					printf("macro added, key-%s \n val-> \n %s \n",macroName, macroBuffer);
+					PrintList(&list);
+					macroFlag = FALSE;
+					continue;
+				}
+			}
+			foundedMacroVal = getFromMacroList(currWord, &list);
+			if (foundedMacroVal != NULL)
+			{
+				newFile = (char *)realloc(newFile, strlen(newFile) + strlen(foundedMacroVal));
+				strcat(newFile, foundedMacroVal);
+			}
+			else if (isMacroLabel(currWord))
+			{
+				macroFlag = TRUE;
+				strcpy(line, line + (strlen(currWord) + 1));
+				strcpy(currWord, getFirstWordFromALine(line, currWord));
+				strcpy(macroName, currWord);
+				if (checkIfMacroInList(macroName, &list))
+				{
+					/*return error*/
+				}
+			}
+			else
+			{
+				newFile = (char *)realloc(newFile, strlen(newFile) + MAX_LINE_LENGTH);
+				strcat(newFile, line);
+			}
+		}
+	}
+	FILE *newFp;
+	char* newFileName = strcat(filename , "am");
+    newFp = fopen(newFileName , "w");
+	if(fputs(newFile, newFp) == EOF){
+		exit(-11);
+	};
+	freeMacroList(list);
+	free(newFile);
+	fclose(filename);
+	return newFileName;
 }

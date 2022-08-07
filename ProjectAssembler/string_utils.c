@@ -2,11 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include "string_utils.h"
 
 char* removeLeadingWhiteSpaces(char* line) {
     int i;
+    int len;
     i = 0;
-    int len = strlen(line);
+    len = strlen(line);
     while(isspace(line[i]) && (i < len))
     {
         i++;
@@ -27,19 +29,8 @@ char* getEndOfWord(char* line) {
     return (line);
 }
 
-int move_white_space(int index, char* string) {
-	for (; (string[(index)] == '\t' || string[(index)] == ' ') && (string[(index)]); (++(index)));
-	return index;
-}
-
 char* getFirstWordFromALine(char* line, char* word)
 {
-    int i;
-    int endOfWordIndex;
-    int length;
-    i = 0;
-    length = strlen(line);
-    endOfWordIndex = 0;
     strcpy(word , line);
     word = removeLeadingWhiteSpaces(word);
     word  = getEndOfWord(word);
@@ -52,4 +43,22 @@ char* removeEndWhiteSpaces(char* line){
      }
     line[length] = '\0';
     return (line);
+}
+
+int isCommnetLine(char* line){
+    char* firstWord;
+    firstWord = getFirstWordFromALine(line, firstWord);
+    if(firstWord[0] == ';'){
+        return 1;
+    }
+    return 0;
+}
+
+int isEmetyLine(char* line){
+    int size = 0;
+    size = strlen(removeLeadingWhiteSpaces(line));
+    if(size == 0){
+        return 1;
+    }
+    return 0;
 }

@@ -184,6 +184,14 @@ void struct_handler(line_details line, char* begin, long *DC, long** data_image_
 	}
 }
 
+void entry_handler(line_details line, char* begin, long *DC, long** data_image_ptr){
+	/*TODO: iterate over the symbol table and mark the label_type as entry*/
+}
+
+void extern_handler(line_details line, char* begin, long *DC, long** data_image_ptr){
+	/*TODO: iterate over the symbol table and mark the label_type as entry*/
+}
+
 bool is_directive(char* line) {
 	bool is_directive = true;
 	while (isspace(*line)) { line++; }
