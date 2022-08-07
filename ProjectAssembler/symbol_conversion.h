@@ -1,6 +1,10 @@
 #ifndef SYMBOL_CONVERSION
 #define SYMBOL_CONVERSION
 
-/* converting from bin or decimal to the new language symobls*/
+char * decimalToSymbolsBase(int num);
+int binToDecimal(char *bin);
+char * decimalToBin(int num);
+char *binToSymbolsBase(char *bin);
+
 
 #endif
