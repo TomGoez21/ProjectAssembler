@@ -13,10 +13,9 @@ typedef struct code_structure {
 	unsigned int dest_addressing : 2;
 	unsigned int src_addressing : 2;
 	unsigned int opcode : 4;
-	/*TODO: if we want to determine if we finished dealing with the word*/
-	bool valid : 1;
 } code_structure;
 
+/*TODO: do we want to use it?*/
 typedef struct binary_line {
 	line_details line;
 	int first_word_address;
@@ -27,10 +26,10 @@ typedef struct binary_line {
 } binary_line;
 
 
-int operands_check(line_details line, long** code_image_ptr, long *IC);
+int operands_check(line_details line, long* code_image_ptr, long *IC);
 
-addressing_type parse_operand_addressing_type(long* L, line_details line, char* operand, long** code_image_ptr, long* IC);
+addressing_type parse_operand_addressing_type(long* L, line_details line, char* operand, long* code_image_ptr, long* IC);
 
-void validate_operand_addressing(long* L_ptr, line_details line, addressing_type src_address, addressing_type dst_address, char* src_oper, char* dst_oper, long** code_image_ptr, long* IC);
+void validate_operand_addressing(long* L_ptr, line_details line, addressing_type src_address, addressing_type dst_address, char* src_oper, char* dst_oper, long code_image_ptr[][80], long* IC);
 
 #endif

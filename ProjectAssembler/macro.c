@@ -3,9 +3,7 @@
 #include <string.h>
 #include "macro.h"
 
-
-
-
+#pragma warning(disable : 4996)
 
 macro* createNewMacro(char* key , char* val){
     macro * new;

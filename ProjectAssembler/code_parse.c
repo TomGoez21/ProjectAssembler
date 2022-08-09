@@ -18,35 +18,35 @@ char* second_order_group[9] = { "clr","not","inc", "dec", "jmp", "bne", "jsr", "
 char* third_order_group[2] = { "rts","hlt" };
 
 
-int operands_check(line_details line, long** code_image_ptr, long *IC) {
+int operands_check(line_details line, long* code_image_ptr, long* IC) {
 	printf("Called not-implemented function - operands_check()");
 	return 0;
 }
 
 /*determine the type of addressing. also add to the word counter L*/
-addressing_type parse_operand_addressing_type(long* L, line_details line, char* operand, long** code_image_ptr, long* IC) {
+addressing_type parse_operand_addressing_type(long* L, line_details line, char* operand, long code_image_ptr[][80], long* IC) {
 	int i;
-	char* label_name = NULL;
-	char* operand_cpy = NULL;
-	operand_cpy = (char*)malloc(80);
-	label_name = (char*)malloc(30);
-	strcpy(operand_cpy, operand);
+	char label_name[30] = { 0 };
+	char* operand_after_label = 0;
+
 	/*get label name, if exists*/
 	for (i = 0; operand[i] != '.' && operand[i]; i++) {
 		label_name[i] = operand[i];
 	}
+
 	label_name[i] = '\0';
 	printf("label name is: %s\n", label_name);
+
 	/*advance the pointer to point after the label*/
-	operand_cpy += strlen(label_name);
+	operand_after_label = operand + strlen(label_name);
 
 	/*check if it is immediate addressing*/
 	if (operand[0] == '#' && is_legal_num(operand + 1)) {
 		printf("true\n");
 		*L += 1;
 		/*adding the immediate operand to code_image*/
-		code_image_ptr[*IC] = *(operand+1);
-		printf(" code in IC place: %c\n", code_image_ptr[*IC]);
+		strcpy(code_image_ptr[*IC], operand + 1);
+		printf(" code in IC place: %s\n", code_image_ptr[*IC]);
 		printf(" IC: %d\n", *IC);
 		(*IC)++;
 		return IMMEDIATE_ADD;
@@ -57,41 +57,49 @@ addressing_type parse_operand_addressing_type(long* L, line_details line, char* 
 		printf("true\n");
 		*L += 1;
 		/*adding the register operand to code_image*/
-		code_image_ptr[*IC] = *(operand);
-		printf(" code in IC place: %c\n", code_image_ptr[*IC]);
+		strcpy(code_image_ptr[*IC], operand);
+		printf(" code in IC place: %s\n", code_image_ptr[*IC]);
 		printf(" IC: %d\n", *IC);
 		(*IC)++;
 		return REGISTER_ADD;
 	}
 
 	/*check if it is struct addressing*/
-	if (is_label_valid_in_struct(line, operand) && (*(operand_cpy) == '.') && ((*(operand_cpy + 1) == '1') || (*(operand_cpy + 1) == '2'))) {
+	if (is_label_valid_in_struct(line, operand) &&
+		(*(operand_after_label) == '.') && ((*(operand_after_label + 1) == '1') || (*(operand_after_label + 1) == '2'))) {
 		printf("true\n");
 		*L += 2;
-		/*adding the label of the struct operand to code_image*/
-		
-		/* TODO: strncpy(code_image_ptr[*IC], label_name, sizeof(label_name));*/
 
-		code_image_ptr[*IC] = *label_name;
-		printf(" code in IC place: %c\n", code_image_ptr[*IC]);
-		printf(" IC: %d\n", *IC);
-		(*IC)++;
-		/*adding the strcut index to code_image*/
-		code_image_ptr[*IC] = *(operand_cpy + 1);
-		printf(" code in IC place: %c\n", code_image_ptr[*IC]);
-		printf(" IC: %d\n", *IC);
-		(*IC)++;
+		/*adding the label of the struct operand to code_image*/
+		if (*label_name) {
+			//*code_image_ptr = (long*)realloc(*code_image_ptr, (*IC + 1) * sizeof(long));
+			printf(" BEFORE: code in IC place: %s\n", code_image_ptr[*IC]);
+			printf(" BEFORE IC: %d\n", *IC);
+			//memcpy(code_image_ptr[*IC], label_name, sizeof(label_name));
+			strncpy(code_image_ptr[*IC], label_name, sizeof(label_name));
+			//code_image_ptr[*IC] = *label_name;
+			printf(" code in IC place: %s\n", code_image_ptr[*IC]);
+			printf(" IC: %d\n", *IC);
+			(*IC)++;
+			/*adding the strcut index to code_image*/
+			strcpy(code_image_ptr[*IC], operand_after_label + 1);
+			//code_image_ptr[*IC] = *(operand_after_label + 1);
+			printf(" code in IC place: %s\n", code_image_ptr[*IC]);
+			printf(" IC: %d\n", *IC);
+			(*IC)++;
+
+		}
+
 		return STRUCT_ADD;
 	}
-
 
 	/*check if it is direct addressing*/
 	if (is_label_valid_in_text(line, operand)) {
 		printf("true\n");
 		*L += 1;
 		/*adding the label operand to code_image*/
-		code_image_ptr[*IC] = *(operand);
-		printf(" code in IC place: %c\n", code_image_ptr[*IC]);
+		strcpy(code_image_ptr[*IC], operand);
+		printf(" code in IC place: %s\n", code_image_ptr[*IC]);
 		printf(" IC: %d\n", *IC);
 		(*IC)++;
 		return DIRECT_ADD;
@@ -103,10 +111,10 @@ addressing_type parse_operand_addressing_type(long* L, line_details line, char* 
 
 
 
-void validate_operand_addressing(long* L_ptr, line_details line, addressing_type src_address, addressing_type dst_address, char* src_oper, char* dst_oper, long** code_image_ptr, long* IC) {
+void validate_operand_addressing(long* L_ptr, line_details line, addressing_type src_address, addressing_type dst_address, char* src_oper, char* dst_oper, long code_image_ptr[][80], long* IC) {
 	int i = 0;
 	int cmp;
-	char* oper = { 0 };
+	char* oper = 0;
 
 	/*get the operator name*/
 	oper = get_first_word(line.line);
@@ -115,8 +123,9 @@ void validate_operand_addressing(long* L_ptr, line_details line, addressing_type
 	*L_ptr += 1;
 
 	/*add operand to code_image*/
-	code_image_ptr[*IC] = *oper;
-	printf(" code in IC place: %c\n", code_image_ptr[*IC]);
+	//*code_image_ptr = (long*)realloc(*code_image_ptr, (*IC + 1) * sizeof(long));
+	strcpy(code_image_ptr[*IC], oper);
+	printf(" code in IC place: %s\n", code_image_ptr[*IC]);
 	printf(" IC: %d\n", *IC);
 	(*IC)++;
 

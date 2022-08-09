@@ -4,6 +4,8 @@
 #include <ctype.h>
 #include "string_utils.h"
 
+#pragma warning(disable : 4996)
+
 char* removeLeadingWhiteSpaces(char* line) {
     int i;
     int len;
@@ -46,7 +48,7 @@ char* removeEndWhiteSpaces(char* line){
 }
 
 int isCommnetLine(char* line){
-    char* firstWord;
+    char* firstWord = NULL;
     firstWord = getFirstWordFromALine(line, firstWord);
     if(firstWord[0] == ';'){
         return 1;

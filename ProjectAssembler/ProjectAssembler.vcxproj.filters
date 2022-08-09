@@ -36,7 +36,13 @@
     <ClCompile Include="code_parse.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="oders.c">
+    <ClCompile Include="orders.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="macro.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="string_utils.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

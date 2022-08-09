@@ -21,8 +21,8 @@ char line[MAX_LINE_LENGTH] = { 0 };
 #pragma warning(disable : 4996)
 
 static bool process_file(char* filename, SymbolTable* symboltable);
-char *preAssemblerProccess(char *filename);
-void line_handler(SymbolTable* symboltable, int line_count, char* line, char* file_name, long *DC, long *IC, long** data_image_ptr, long** code_image_ptr); 
+char* preAssemblerProccess(char* filename);
+void line_handler(SymbolTable* symboltable, int line_count, char* line, char* file_name, long* DC, long* IC, long** data_image_ptr, long** code_image_ptr);
 
 int main(int argc, char* argv[]) {
 	int i;
@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
 	for (i = 1; i < argc; ++i) {
 		/* if last process failed and there's another file, break line: */
 		if (!succeeded) puts("");
-		argv[i] = preAssemblerProccess(argv[i]);
+		//argv[i] = preAssemblerProccess(argv[i]);
 		/* for each file name, send it for full processing. */
 		succeeded = process_file(argv[i], &symboltable);
 		/* Line break if failed */
@@ -46,12 +46,12 @@ int main(int argc, char* argv[]) {
 
 
 bool process_file(char* filename, SymbolTable* symboltable) {
-	long DC = 0;
 	long IC = 0;
-	/*long* data_image = (long*)calloc(1, sizeof(long));
-	long* code_image = (long*)calloc(1, sizeof(long));*/
-	long* data_image[MAX_DATA_IMAGE_LENGTH] = {0};
-	long* code_image[MAX_CODE_IMAGE_LENGTH] = {0};
+	long DC = 0;
+	/*long* data_image = (long*)calloc(1, sizeof(long));*/
+	//long* code_image = (long*)calloc(1, sizeof(long));
+	long* data_image[MAX_DATA_IMAGE_LENGTH] = { 0 };
+	long code_image[MAX_CODE_IMAGE_LENGTH][MAX_LINE_LENGTH] = { 0 };
 	unsigned int line_count = 0;
 	FILE* file_dst; /* Current assembly file descriptor to process */
 	char* input_file;
@@ -72,20 +72,22 @@ bool process_file(char* filename, SymbolTable* symboltable) {
 	while (fgets(line, MAX_LINE_LENGTH, file_dst)) {
 		printf("-------------\n");
 		printf("line[%06d]: %s", ++line_count, line);
+		/*
 		if(isEmetyLine(line) || isCommnetLine(line)){
 			continue;
-		}
-		line_handler(symboltable, line_count, line, input_file, &DC, &IC, &data_image, &code_image);
+		}*/
+
+		line_handler(symboltable, line_count, line, input_file, &DC, &IC, data_image, code_image);
 		printf("\nDC:%ld\n", DC);
 		/*printf("data_image:%l\n", data_image);*/
 		printf("IC:%ld\n", IC);
 
 	}
-	int i =0;
+	int i = 0;
 	for (; i < IC; i++) {
-		printf("code image: %c\n", code_image[i]);
+		printf("code image: %s\n", code_image[i]);
 	}
-	i=0;
+	i = 0;
 	for (; i < DC; i++) {
 		printf("data_image: %d\n", data_image[i]);
 	}
@@ -98,10 +100,10 @@ void line_handler(
 	int line_count,
 	char* line,
 	char* file_name,
-	long *DC,
-	long *IC,
+	long* DC,
+	long* IC,
 	long** data_image_ptr,
-	long** code_image_ptr
+	long code_image_ptr[][MAX_LINE_LENGTH]
 ) {
 	/*L is number of code words in a line*/
 	long L = 0;
@@ -115,18 +117,17 @@ void line_handler(
 	ld.file_name = file_name;
 	ld.line = line;
 
-/*gets a label. returns null if no label found*/
+	/*gets a label. returns null if no label found*/
 	char* label = { 0 };
 	label = get_label(ld);
 	printf("\nlabel:%s\n", label);
-	printf("length label:%ld\n", strlen(label));
-
+	printf("length label:%lu\n", strlen(label));
 
 	/*continue to the next word*/
 	ld.line = ld.line + strlen(label) + 1;
 	while (isspace(*(ld.line))) { (ld.line)++; }
 
-	printf("points after label to:%c\n", *ld.line);
+	printf("points after label to:%s\n", ld.line);
 
 	/*check whether it is one of .data, .struct, .string, .extern, .entry*/
 	if (is_directive(ld.line)) {
@@ -152,8 +153,8 @@ void line_handler(
 				printf_line_error(ld, "ignoring labels in the beginning of .entry line");
 			}
 
-		ld.line = ld.line + strlen(dir) + 1;
-		printf("points after directie to:%c\n", *ld.line);
+			ld.line = ld.line + strlen(dir) + 1;
+			printf("points after directie to:%c\n", *ld.line);
 		}
 		if (directive_type == _data) {
 			data_handler(ld, ld.line, DC, data_image_ptr);
@@ -175,32 +176,32 @@ void line_handler(
 		if (is_order(ld)) {
 			/* check the structre of the order. return number of words this code is translated to*/
 			validate_operand_addressing(&L, ld, src_address, dst_address, src_oper, dst_oper, code_image_ptr, IC);
-		
+
 			/*int L = operands_check(ld, code_image_ptr, IC);
 			binary_conversion_to_base_32(line, IC);*/
 			/*TO DO: using the final value of IC to detemrine the value of the data symbols*/
 		}
 	}
-	
+
 }
 
-char *preAssemblerProccess(char *filename)
+char* preAssemblerProccess(char* filename)
 {
-	FILE *fd;
+	FILE* fd;
 	char line[MAX_LINE_LENGTH];
 	char currWord[MAX_LINE_LENGTH];
 	int macroFlag = 0;
 	char macroBuffer[MAX_LINE_LENGTH];
 	char macroName[MAX_LINE_LENGTH];
 	int linesToPass = 0;
-	char *foundedMacroVal;
-	char *newFile = malloc(MAX_LINE_LENGTH * sizeof(char));
-	if (!(fd = fopen(filename, "r+")))
+	char* foundedMacroVal;
+	char* newFile = malloc(MAX_LINE_LENGTH * sizeof(char));
+	if (!(fd = fopen(filename, "r")))
 	{
 		fprintf(stderr, "cannot  open file\n");
 		exit(-10);
 	}
-	macroList *list = createNewMacroList();
+	macroList* list = createNewMacroList();
 	while (!feof(fd))
 	{
 		if (fgets(line, MAX_LINE_LENGTH, fd) != NULL)
@@ -217,7 +218,7 @@ char *preAssemblerProccess(char *filename)
 				else
 				{
 					AddToMacroList(createNewMacro(macroName, macroBuffer), &list);
-					printf("macro added, key-%s \n val-> \n %s \n",macroName, macroBuffer);
+					printf("macro added, key-%s \n val-> \n %s \n", macroName, macroBuffer);
 					PrintList(&list);
 					macroFlag = FALSE;
 					continue;
@@ -226,7 +227,7 @@ char *preAssemblerProccess(char *filename)
 			foundedMacroVal = getFromMacroList(currWord, &list);
 			if (foundedMacroVal != NULL)
 			{
-				newFile = (char *)realloc(newFile, strlen(newFile) + strlen(foundedMacroVal));
+				newFile = (char*)realloc(newFile, strlen(newFile) + strlen(foundedMacroVal));
 				strcat(newFile, foundedMacroVal);
 			}
 			else if (isMacroLabel(currWord))
@@ -242,15 +243,15 @@ char *preAssemblerProccess(char *filename)
 			}
 			else
 			{
-				newFile = (char *)realloc(newFile, strlen(newFile) + MAX_LINE_LENGTH);
+				newFile = (char*)realloc(newFile, strlen(newFile) + MAX_LINE_LENGTH);
 				strcat(newFile, line);
 			}
 		}
 	}
-	FILE *newFp;
-	char* newFileName = strcat(filename , "am");
-    newFp = fopen(newFileName , "w");
-	if(fputs(newFile, newFp) == EOF){
+	FILE* newFp;
+	char* newFileName = strcat(filename, "am");
+	newFp = fopen(newFileName, "w");
+	if (fputs(newFile, newFp) == EOF) {
 		exit(-11);
 	};
 	freeMacroList(list);

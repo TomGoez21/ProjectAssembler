@@ -142,8 +142,10 @@
     <ClCompile Include="code_parse.c" />
     <ClCompile Include="directives.c" />
     <ClCompile Include="label_check.c" />
+    <ClCompile Include="macro.c" />
     <ClCompile Include="main.c" />
-    <ClCompile Include="oders.c" />
+    <ClCompile Include="orders.c" />
+    <ClCompile Include="string_utils.c" />
     <ClCompile Include="symbol_conversion.c" />
     <ClCompile Include="symbol_table.c" />
     <ClCompile Include="utils.c" />
