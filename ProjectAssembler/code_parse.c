@@ -8,6 +8,7 @@
 #include "label_check.h"
 #include "orders.h"
 #include "code_parse.h"
+#include "symbol_conversion.h"
 #include "string_utils.h"
 
 #pragma warning(disable : 4996)
@@ -111,25 +112,25 @@ addressing_type parse_operand_addressing_type(long* L, line_details line, char* 
 
 
 
-void validate_operand_addressing(long* L_ptr, line_details line, addressing_type src_address, addressing_type dst_address, char* src_oper, char* dst_oper, long code_image_ptr[][80], long* IC) {
+void validate_operand_addressing(char** oper, long* L_ptr, line_details line, addressing_type* src_address, addressing_type* dst_address, char* src_oper, char* dst_oper, long code_image_ptr[][80], long* IC) {
 	int i = 0;
 	int cmp;
-	char* oper = 0;
+	/*char* oper = 0;*/
 
 	/*get the operator name*/
-	oper = get_first_word(line.line);
-	printf("the first: %s\n", oper);
+	*oper = get_first_word(line.line);
+	printf("the first: %s\n", *oper);
 	/*add +1 to L because of opcode*/
 	*L_ptr += 1;
 
 	/*add operand to code_image*/
 	//*code_image_ptr = (long*)realloc(*code_image_ptr, (*IC + 1) * sizeof(long));
-	strcpy(code_image_ptr[*IC], oper);
+	strcpy(code_image_ptr[*IC], *oper);
 	printf(" code in IC place: %s\n", code_image_ptr[*IC]);
 	printf(" IC: %d\n", *IC);
 	(*IC)++;
 
-	line.line += strlen(oper);
+	line.line += strlen(*oper);
 	while (isspace(*(line.line))) { ((line.line))++; }
 
 	/*get the src_address name*/
@@ -152,13 +153,13 @@ void validate_operand_addressing(long* L_ptr, line_details line, addressing_type
 	/*check if opcode in the first group of opcodes, which means it gets 2 operands./
 	there are 5 opcode in this group.*/
 	for (i = 0; i < 5; i++) {
-		cmp = strcmp(oper, first_order_group[i]);
+		cmp = strcmp(*oper, first_order_group[i]);
 		if (cmp == 0) {
 			printf("first group\n");
-			src_address = parse_operand_addressing_type(L_ptr, line, src_oper, code_image_ptr, IC);
-			printf("src_add type:%d\n", src_address);
-			dst_address = parse_operand_addressing_type(L_ptr, line, dst_oper, code_image_ptr, IC);
-			printf("dst_add type:%d\n", dst_address);
+			*src_address = parse_operand_addressing_type(L_ptr, line, src_oper, code_image_ptr, IC);
+			printf("src_add type:%d\n", *src_address);
+			*dst_address = parse_operand_addressing_type(L_ptr, line, dst_oper, code_image_ptr, IC);
+			printf("dst_add type:%d\n", *dst_address);
 
 			return;
 		}
@@ -169,9 +170,9 @@ void validate_operand_addressing(long* L_ptr, line_details line, addressing_type
 		cmp = strcmp(oper, second_order_group[i]);
 		if (cmp == 0) {
 			printf("second");
-			src_address = parse_operand_addressing_type(L_ptr, line, src_oper, code_image_ptr, IC);
+			*src_address = parse_operand_addressing_type(L_ptr, line, src_oper, code_image_ptr, IC);
 			/*no dst address*/
-			dst_address = 4;
+			*dst_address = NONE;
 			return;
 		}
 	}
@@ -182,8 +183,8 @@ void validate_operand_addressing(long* L_ptr, line_details line, addressing_type
 		if (cmp == 0) {
 			printf("third");
 			/*no dst or src address*/
-			src_address = 4;
-			dst_address = 4;
+			*src_address = NONE;
+			*dst_address = NONE;
 			return;
 		}
 	}
@@ -192,3 +193,25 @@ void validate_operand_addressing(long* L_ptr, line_details line, addressing_type
 void first_word_code(line_details line, char *operand, addressing_type src_address, addressing_type dst_address) {
 
 }*/
+
+
+void opcode_to_bin(char* opernad, addressing_type src_add, addressing_type dst_add, char* src_oper, char* dst_oper) {
+	int operand_num = 0;
+	int bin_num = 0;
+	code_structure ten_bit_code;
+	operand_num = get_order_num(opernad);
+	printf("order_num %d\n", operand_num);
+	ten_bit_code.opcode = operand_num;
+	ten_bit_code.src_addressing = src_add;
+	ten_bit_code.dest_addressing = dst_add;
+	ten_bit_code.ARE = 0;
+
+	bin_num = ten_bit_code.opcode << 6
+		| ten_bit_code.src_addressing << 4
+		| ten_bit_code.dest_addressing << 2
+		| ten_bit_code.ARE;
+
+	printf("bin number: %s\n", decimalToBin(bin_num));
+
+}
+

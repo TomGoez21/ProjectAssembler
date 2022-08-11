@@ -4,6 +4,7 @@
 #define MAX_LABEL_LENGTH 30
 
 char* get_order(line_details line);
+int* get_order_num(char* order);
 bool is_order(line_details line);
 bool is_reserved_word(line_details line, char* text);
 bool is_label_valid(line_details line, char* text);

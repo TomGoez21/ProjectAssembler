@@ -1,4 +1,8 @@
 #include "symbol_conversion.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+
 
 char symbols[32] = { '!','@','#','$','%','^','&','*','<','>','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v' };
 
@@ -19,7 +23,7 @@ char * decimalToSymbolsBase(int num){
         bin[j] = temp;
     }    
     if(!SymbolsChars)
-        return "`Dynamic allocatio error.\0";
+        return "`Dynamic allocation error.\0";
     for (i=9;i>-1;i--){
         sb+=pow(2,count)*(bin[i]-'0');
         count++;
@@ -52,9 +56,9 @@ char * decimalToBin(int num){
     unsigned int i=0,abs = num;
     int j;
     char temp;
-    char * bin = (char *)malloc(11* sizeof(char));
+    char * bin = (char *)calloc(11, sizeof(char));
     if (!bin)
-        return "`Dynamic allocatio error.\0";
+        return "Dynamic allocation error.\0";
     while(i<10){
         bin[i]= abs%2+'0';
         abs=abs/2;
@@ -77,7 +81,7 @@ char *binToSymbolsBase(char *bin){
     int position=1;
     char * SymbolsChars = malloc(3*sizeof(char));
     if(!SymbolsChars)
-        return "`Dynamic allocatio error.\0";
+        return "`Dynamic allocation error.\0";
     for (i=9;i>-1;i--){
         num+=pow(2,count)*(bin[i]-'0');
         count++;

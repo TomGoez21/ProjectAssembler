@@ -14,6 +14,17 @@ char* directive_list[5] = { "data","string","struct","entry","extern" };
 char* order_list[16] = { "mov","cmp","add","sub","not","clr","lea","inc","dec","jmp","bne","get","prn","jsr","rts","hlt" };
 char* reg_list[8] = { "r0","r1","r2","r3","r4","r5","r6","r7" };
 
+/*gets the decimal value of an order*/
+int* get_order_num(char* order) {
+	int i;
+	int cmp;
+	for (i = 0; i < NUM_ORDERS; i++) {
+		cmp = strcmp(order, order_list[i]);
+		if (cmp == 0) {
+			return i;
+		}
+	}
+}
 
 /*extract order from text*/
 char* get_order(line_details line) {
