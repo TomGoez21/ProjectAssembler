@@ -5,116 +5,131 @@
 
 #pragma warning(disable : 4996)
 
-macro* createNewMacro(char* key , char* val){
-    macro * new;
-    new = (macro*) malloc(sizeof(macro));
-    strcpy(new -> key, key);
-    new -> val = val;
+macro* createNewMacro(char* key, char* val) {
+    macro* new;
+    char* tempVal;
+    new = (macro*)malloc(sizeof(macro));
+#pragma warning(suppress : 4996)
+    strcpy(new->key, key);
+    tempVal = new->val;
+    tempVal =(char*) malloc(strlen(val)+81);
+    tempVal[0] = '\0';
+#pragma warning(suppress : 4996)
+    strcpy(tempVal,val);
+    new->val = tempVal;
     return (new);
 }
 
 
-macroList* createNewMacroList(){
-    macroList * new;
-    new = (macroList*) malloc(sizeof(macroList));
-    new -> size = 0;
+macroList* createNewMacroList() {
+    macroList* new;
+    new = (macroList*)malloc(sizeof(macroList));
+    new->size = 0;
     return (new);
 }
 
-int Sempty(macroList *temp) {
-   if (temp == NULL)
-      return 1;
-   else
-      return 0;
+int Sempty(macroList* temp) {
+    if (temp == NULL)
+        return 1;
+    else
+        return 0;
 }
 
-void AddToMacroList(macro* m , macroList** list){
-    macroList * new;
-    printf("key2 -> %s \n", m -> key);
-    new = (macroList*) malloc(sizeof(macroList));
-    new -> data = m;
-    new -> next = *list;
-    new -> size = ((*list)->size) + 1;
+void AddToMacroList(macro* m, macroList** list) {
+    macroList* new;
+    printf("key -> %s \n val ->\n%s\n", m->key , m->val);
+    new = (macroList*)malloc(sizeof(macroList));
+    new->data = m;
+    new->next = *list;
+    new->size = ((*list)->size) + 1;
     *list = new;
 }
-int checkIfMacroInList(char* word , macroList** list){
-    macroList *temp;
-    macro *curr;
+int checkIfMacroInList(char* word, macroList** list) {
+    macroList* temp;
+    macro* curr;
     temp = *list;
-    printf("list size - %d \n" , (*list)-> size);
-    if (Sempty(temp)){
+    if (Sempty(temp)) {
         printf("\nThe stack is empty!");
         return FALSE;
     }
     else {
-      while (temp->size > 0) {
-        curr = temp->data;
-        if(!strcmp((curr->key) , word)){
-            printf(" key :%s , word: %s\n", curr->key, word);
-            return TRUE;     
+        while (temp->size > 0) {
+            curr = temp->data;
+            if (!strcmp((curr->key), word)) {
+                printf(" key :%s , word: %s\n", curr->key, word);
+                return TRUE;
+            }
+            temp = temp->next;
         }
-        temp = temp->next;
-      }
-      return FALSE;
+        return FALSE;
     }
 }
-void PrintList(macroList ** list){
-    macroList *temp;
-    macro *curr;
+void PrintList(macroList** list) {
+    macroList* temp;
+    macro* curr;
     temp = *list;
-    printf("list size - %d \n" , (*list)-> size);
+    printf("list size - %d \n", (*list)->size);
     if (Sempty(temp))
         printf("\nThe stack is empty!");
     else {
-      while (temp->size > 0) {
-        curr = temp->data;
-        printf(" key :%s\n", curr->key);
-        printf(" val :%s\n", curr->val);
-        temp = temp->next;
-      }
-   }
+        while (temp->size > 0) {
+            curr = temp->data;
+            printf(" key :%s\n", curr->key);
+            printf(" val :\n%s\n", curr->val);
+            temp = temp->next;
+        }
+    }
 }
-char* getFromMacroList(char* word , macroList ** list){
-    macroList *temp;
-    macro *curr;
+macro* getFromMacroList(char* word, macroList** list) {
+    macroList* temp;
+    macro* curr;
     temp = *list;
-    printf("list size - %d \n" , (*list)-> size);
     if (Sempty(temp))
         printf("\nThe stack is empty!");
     else {
-      while (temp->size > 0) {
-        curr = temp->data;
-        if(!strcmp((curr->key) , word)){
-            printf(" key :%s , word: %s\n", curr->key, word);
-            return curr->val;     
+        while (temp->size > 0) {
+            curr = temp->data;
+            if (!strcmp((curr->key), word)) {
+                printf(" key :%s , val: \n%s\n", curr->key, curr->val);
+                return curr;
+            }
+            temp = temp->next;
         }
-        temp = temp->next;
-      }
-   }
-   return NULL;
+    }
+    return NULL;
 }
 
-int isEndMacroLabel(char* word){
-    if(!strcmp(word ,END_MACRO)){
+int isEndMacroLabel(char* word) {
+    if (!strcmp(word, END_MACRO)) {
         return TRUE;
-    }else 
+    }
+    else
         return FALSE;
 }
 
-int isMacroLabel(char* word){
-    if(!strcmp(word ,MACRO)){
+int isMacroLabel(char* word) {
+    if (!strcmp(word, MACRO)) {
         return TRUE;
-    }else{ 
+    }
+    else {
         return FALSE;
     }
 }
 
-void freeMacroList(macroList * head){
-    macroList *tmp;
-    while (head != NULL) {
+void freeMacroList(macroList* head) {
+    if (head == NULL) return;
+    int size = head->size;
+    macroList* tmp;
+    macro* macroTmp;
+    char* charTmp;
+    for(;size>0 ; size--){
         tmp = head;
         head = head->next;
-        free(tmp->data);
+        macroTmp = tmp->data;
+        charTmp = macroTmp->val;
+        free(charTmp);
+        free(macroTmp);
         free(tmp);
     }
+    free(head);
 }

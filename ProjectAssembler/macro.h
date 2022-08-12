@@ -22,7 +22,7 @@ int Sempty(macroList *temp);
 void AddToMacroList(macro* , macroList **);
 void clearPrintList(macroList **);
 void PrintList(macroList ** );
-char* getFromMacroList(char* word , macroList ** list);
+macro* getFromMacroList(char* word , macroList ** list);
 int isEndMacroLabel(char* word);
 int isMacroLabel(char* currWord);
 int checkIfMacroInList(char* word , macroList** list);
