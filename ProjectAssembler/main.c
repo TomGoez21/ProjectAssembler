@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
 	for (i = 1; i < argc; ++i) {
 		/* if last process failed and there's another file, break line: */
 		if (!succeeded) puts("");
-		//argv[i] = preAssemblerProccess(argv[i]);
+		argv[i] = preAssemblerProccess(argv[i]);
 		/* for each file name, send it for full processing. */
 		succeeded = process_file(argv[i], &symboltable);
 		/* Line break if failed */
@@ -74,17 +74,13 @@ bool process_file(char* filename, SymbolTable* symboltable) {
 	long code_image[MAX_CODE_IMAGE_LENGTH][MAX_LINE_LENGTH] = { 0 };
 	unsigned int line_count = 0;
 	FILE* file_dst; /* Current assembly file descriptor to process */
-	char* input_file;
-
-	/* Concat filename with .as extension */
-	input_file = cat_str(filename, ".as");
 
 	/* Open file. Skip if fails */
-	file_dst = fopen(input_file, "r");
+	file_dst = fopen(filename, "r");
 	if (file_dst == NULL) {
 		/* if file couldn't be opened, write to stderr. */
 		printf("Error: Can't access to \"%s.as\" . skipping it.\n", filename);
-		free(input_file); /* The only allocated space is for the full file name */
+		free(filename); /* The only allocated space is for the full file name */
 		return false;
 	}
 
@@ -92,12 +88,12 @@ bool process_file(char* filename, SymbolTable* symboltable) {
 	while (fgets(line, MAX_LINE_LENGTH, file_dst)) {
 		printf("-------------\n");
 		printf("line[%06d]: %s", ++line_count, line);
-		/*
+		
 		if(isEmetyLine(line) || isCommnetLine(line)){
 			continue;
-		}*/
+		}
 
-		line_handler(symboltable, line_count, line, input_file, &DC, &IC, data_image, code_image);
+		line_handler(symboltable, line_count, line, filename, &DC, &IC, data_image, code_image);
 		printf("\nDC:%ld\n", DC);
 		/*printf("data_image:%l\n", data_image);*/
 		printf("IC:%ld\n", IC);
@@ -131,7 +127,7 @@ bool process_file(char* filename, SymbolTable* symboltable) {
 	while (fgets(line, MAX_LINE_LENGTH, file_dst)) {
 		printf("\n-------------\n");
 		printf("line[%06d]: %s", ++line_count, line);
-		line_handler_sec_pass(symboltable, line_count, line, input_file, &DC, &IC, data_image, code_image);
+		line_handler_sec_pass(symboltable, line_count, line, filename, &DC, &IC, data_image, code_image);
 	}
 }
 
@@ -305,50 +301,60 @@ char* preAssemblerProccess(char* filename)
 	char line[MAX_LINE_LENGTH];
 	char currWord[MAX_LINE_LENGTH];
 	int macroFlag = 0;
-	char macroBuffer[MAX_LINE_LENGTH];
+	char* macroBuffer = (char*)malloc(MAX_LINE_LENGTH);
 	char macroName[MAX_LINE_LENGTH];
-	int linesToPass = 0;
-	char* foundedMacroVal;
-	char* newFile = malloc(MAX_LINE_LENGTH * sizeof(char));
+	char leadingWhiteSpace[MAX_LINE_LENGTH] ;
+	char* concatWhiteSpaces = "";
+	macro *foundedMacro;
+	char *newFile = (char*) calloc(MAX_LINE_LENGTH * sizeof(char) , sizeof(char*));
+#pragma warning(suppress : 4996)
+	strcpy(newFile, "");
+	strcpy(macroBuffer, "");
+	strcpy(leadingWhiteSpace, "");
+	
 	if (!(fd = fopen(filename, "r")))
 	{
 		fprintf(stderr, "cannot  open file\n");
 		exit(-10);
 	}
-	macroList* list = createNewMacroList();
+	macroList *list = createNewMacroList();
 	while (!feof(fd))
 	{
 		if (fgets(line, MAX_LINE_LENGTH, fd) != NULL)
 		{
-			strcpy(currWord, getFirstWordFromALine(line, currWord));
+			strcpy(currWord, getFirstWordFromALine(line , currWord));
 			if (macroFlag)
 			{
 				if (!isEndMacroLabel(currWord))
 				{
-					linesToPass++;
-					strncat(macroBuffer, line, MAX_LINE_LENGTH);
+					macroBuffer = (char*)realloc(macroBuffer, strlen(macroBuffer) + MAX_LINE_LENGTH*2);
+					strcat(macroBuffer, removeLeadingWhiteSpaces(line));
 					continue;
 				}
 				else
 				{
 					AddToMacroList(createNewMacro(macroName, macroBuffer), &list);
-					printf("macro added, key-%s \n val-> \n %s \n", macroName, macroBuffer);
+					printf("macro added, key-%s \nval-> \n%s \n", macroName, macroBuffer);
 					PrintList(&list);
 					macroFlag = FALSE;
+					strcpy(macroBuffer,"");
 					continue;
 				}
 			}
-			foundedMacroVal = getFromMacroList(currWord, &list);
-			if (foundedMacroVal != NULL)
+			foundedMacro = getFromMacroList(currWord, &list);
+			if (foundedMacro != NULL)
 			{
-				newFile = (char*)realloc(newFile, strlen(newFile) + strlen(foundedMacroVal));
-				strcat(newFile, foundedMacroVal);
+				strcpy(leadingWhiteSpace, getLeadingWhiteSpace(line));
+				newFile = (char *)realloc(newFile, (strlen(newFile) + countLines(foundedMacro->val)) * 81 + 1);
+				concatWhiteSpaces = concatWhiteSpacesPerEachLine(foundedMacro->val, leadingWhiteSpace);
+				strcat(newFile, concatWhiteSpaces);
 			}
 			else if (isMacroLabel(currWord))
 			{
 				macroFlag = TRUE;
+				strcpy(line, removeLeadingWhiteSpaces(line));
 				strcpy(line, line + (strlen(currWord) + 1));
-				strcpy(currWord, getFirstWordFromALine(line, currWord));
+				strcpy(currWord, getFirstWordFromALine(line , currWord));
 				strcpy(macroName, currWord);
 				if (checkIfMacroInList(macroName, &list))
 				{
@@ -357,19 +363,24 @@ char* preAssemblerProccess(char* filename)
 			}
 			else
 			{
-				newFile = (char*)realloc(newFile, strlen(newFile) + MAX_LINE_LENGTH);
+				newFile = (char*)realloc(newFile,  (strlen(newFile) + 81));
+				if (newFile== NULL) {
+					printf("Failed to alcote");
+				}
 				strcat(newFile, line);
 			}
 		}
 	}
-	FILE* newFp;
-	char* newFileName = strcat(filename, "am");
-	newFp = fopen(newFileName, "w");
-	if (fputs(newFile, newFp) == EOF) {
+	printf("--------------------NEW MACRO FILE-------------------------\n%s\n" , newFile);
+	FILE *newFp;
+	filename[strlen(filename)-1] = 'm';
+    newFp = fopen(filename, "w");
+	if(fputs(newFile, newFp) == EOF){
 		exit(-11);
 	};
 	freeMacroList(list);
-	free(newFile);
-	fclose(filename);
-	return newFileName;
+	free(macroBuffer);
+	free(concatWhiteSpaces);
+	fclose(newFp);
+	return filename;
 }

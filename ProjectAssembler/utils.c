@@ -26,7 +26,7 @@ int printf_line_error(line_details line, char* error_message, ...) {
 
 
 char* cat_str(char* str0, char* str1) {
-	char* str = (char*)check_malloc(strlen(str0) + strlen(str1) + 1);
+	char* str = (char*)check_malloc(strlen(str0) + strlen(str1) + 1); //TODO: free memory
 	strcpy(str, str0);
 	strcat(str, str1);
 	return str;
