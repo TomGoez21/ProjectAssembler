@@ -36,10 +36,13 @@ void add_to_table(SymbolTable* table, SymbolTableEntry to_add) {
 	/* (Shallow) copy the new entry to the table*/
 	memcpy(&(table->entries[table->size - 1]), &to_add, sizeof(SymbolTableEntry));
 }
-/*check symbol doesnt already exsit*/
 
 
-
-/*SymbolTableEntry construct_entry(char* text, long IC, long DC) {
-
-}*/
+SymbolTableEntry* find_label_from_table(SymbolTable* table, char* label) {
+	int i;
+	for (i = 0; i < table->size; ++i) {
+		if (strcmp(table->entries[i].symbol_name, label) == 0) {
+			return &table->entries[i];
+		}
+	}
+}

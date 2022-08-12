@@ -19,4 +19,7 @@ typedef struct SymbolTable {
 } SymbolTable;
 
 void add_to_table(SymbolTable* table, SymbolTableEntry to_add);
+
+SymbolTableEntry* find_label_from_table(SymbolTable* table, char* label);
+
 #endif

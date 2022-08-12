@@ -20,7 +20,7 @@
 char line[MAX_LINE_LENGTH] = { 0 };
 #pragma warning(disable : 4996)
 
-static bool process_file(char* filename, SymbolTable* symboltable);
+static bool process_file(char* filename, SymbolTable* symboltable, CodeTable* codetable);
 char* preAssemblerProccess(char* filename);
 void line_handler(
 	SymbolTable* symboltable,
@@ -34,6 +34,7 @@ void line_handler(
 
 void line_handler_sec_pass(
 	SymbolTable* symboltable,
+	CodeTable* codetable,
 	int line_count,
 	char* line,
 	char* file_name,
@@ -46,9 +47,6 @@ void line_handler_sec_pass(
 
 int main(int argc, char* argv[]) {
 	int i;
-	SymbolTable symboltable;
-	symboltable.size = 0;
-	symboltable.entries = NULL;
 
 	/* To break line if needed */
 	bool succeeded = true;
@@ -58,15 +56,22 @@ int main(int argc, char* argv[]) {
 		if (!succeeded) puts("");
 		//argv[i] = preAssemblerProccess(argv[i]);
 		/* for each file name, send it for full processing. */
-		succeeded = process_file(argv[i], &symboltable);
+		SymbolTable symboltable;
+		symboltable.size = 0;
+		symboltable.entries = NULL;
+		CodeTable codetable;
+		codetable.size = 0;
+		codetable.entries = NULL;
+
+		succeeded = process_file(argv[i], &symboltable, &codetable);
 		/* Line break if failed */
 	}
 	return 0;
 }
 
 
-bool process_file(char* filename, SymbolTable* symboltable) {
-	long IC = 0;
+bool process_file(char* filename, SymbolTable* symboltable, CodeTable* codetable) {
+	long IC = 100;
 	long DC = 0;
 	/*long* data_image = (long*)calloc(1, sizeof(long));*/
 	//long* code_image = (long*)calloc(1, sizeof(long));
@@ -103,7 +108,7 @@ bool process_file(char* filename, SymbolTable* symboltable) {
 		printf("IC:%ld\n", IC);
 
 	}
-	int i = 0;
+	int i = 100;
 	for (; i < IC; i++) {
 		printf("code image: %s\n", code_image[i]);
 	}
@@ -126,12 +131,19 @@ bool process_file(char* filename, SymbolTable* symboltable) {
 	/*second pass on all lines in order to detemine the value of each word*/
 	rewind(file_dst);
 	line_count = 0;
-
+	IC = 100;
+	DC = 0;
 
 	while (fgets(line, MAX_LINE_LENGTH, file_dst)) {
 		printf("\n-------------\n");
 		printf("line[%06d]: %s", ++line_count, line);
-		line_handler_sec_pass(symboltable, line_count, line, input_file, &DC, &IC, data_image, code_image);
+		line_handler_sec_pass(symboltable, codetable, line_count, line, input_file, &DC, &IC, data_image, code_image);
+	}
+
+	i = 0;
+	for (; i < codetable->size; i++) {
+		printf("code: %s\n", codetable->entries[i].code);
+		printf("address: %d\n", codetable->entries[i].address);
 	}
 }
 
@@ -219,17 +231,16 @@ void line_handler(
 		/*check if word is order from the order_list. If so, analyze the operands*/
 		if (is_order(ld)) {
 			/* check the structre of the order. return number of words this code is translated to*/
-			validate_operand_addressing(&oper, &L, ld, &src_address, &dst_address, src_oper, dst_oper, code_image_ptr, IC);
-			opcode_to_bin(oper, src_address, dst_address, src_oper, dst_oper);
+			validate_operand_addressing(&oper, &L, ld, &src_address, &dst_address, &src_oper, &dst_oper, code_image_ptr, IC);
 		}
 	}
-
 }
 
 
 
 void line_handler_sec_pass(
 	SymbolTable* symboltable,
+	CodeTable* codetable,
 	int line_count,
 	char* line,
 	char* file_name,
@@ -244,6 +255,7 @@ void line_handler_sec_pass(
 	line_details ld;
 	addressing_type src_address = NONE;
 	addressing_type dst_address = NONE;
+	CodeTableEntry* code_table_line = malloc(sizeof(CodeTableEntry));
 	char* src_oper = NULL;
 	char* dst_oper = NULL;
 	ld.line_number = line_count;
@@ -291,13 +303,22 @@ void line_handler_sec_pass(
 		/*check if word is order from the order_list. If so, analyze the operands*/
 		if (is_order(ld)) {
 			/* check the structre of the order. return number of words this code is translated to*/
-			validate_operand_addressing(&oper, &L, ld, &src_address, &dst_address, src_oper, dst_oper, code_image_ptr, IC);
-			opcode_to_bin(oper, src_address, dst_address, src_oper, dst_oper);
-			printf("done");
+			validate_operand_addressing(&oper, &L, ld, &src_address, &dst_address, &src_oper, &dst_oper, code_image_ptr, IC);
+			opcode_to_bin(&L, IC, oper, src_address, dst_address, src_oper, dst_oper, codetable, code_table_line);
+			if (src_address == REGISTER_ADD && dst_address == REGISTER_ADD) {
+				printf("regester src & dst");
+			}
+			else {
+				src_to_bin(&L, IC, oper, src_address, dst_address, src_oper, dst_oper, codetable, code_table_line, symboltable);
+				dst_to_bin(&L, IC, oper, src_address, dst_address, src_oper, dst_oper, codetable, code_table_line, symboltable);
+			
+			}
 		}
 	}
 
 }
+
+
 
 char* preAssemblerProccess(char* filename)
 {
