@@ -1,3 +1,4 @@
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -181,7 +182,7 @@ void validate_operand_addressing(char** oper, long* L_ptr, line_details line, ad
 	}
 	/*check if opcode in the third group of opcodes, which means it gets 1 operand./
 	there are 9 opcode in this group.*/
-	for (i = 0; i < 9; i++) {
+	for (i = 0; i < 2; i++) {
 		cmp = strcmp(*oper, third_order_group[i]);
 		if (cmp == 0) {
 			printf("third");
@@ -256,7 +257,7 @@ void src_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, a
 	neg_char[0] = '-';
 	if (src_add == IMMEDIATE_ADD) {
 		if (*(src_oper + 1) == '-') {
-			ten_bit_code.address = atoi(strcat( neg_char, src_oper + 2));
+			ten_bit_code.address = atoi(strcat(neg_char, src_oper + 2));
 		}
 		else {
 			ten_bit_code.address = atoi(src_oper + 1);
@@ -297,7 +298,7 @@ void src_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, a
 		}
 		label_name[i] = '\0';
 		symbol_line = find_label_from_table(symboltable, label_name);
-		
+
 		ten_bit_code.address = symbol_line->counter;
 		ten_bit_code.ARE = 2;
 		bin_num = ten_bit_code.address << 2
@@ -308,7 +309,7 @@ void src_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, a
 		add_to_code_table(codetable, *code_table_line);
 		printf("src code: %s and word was: %s\n", code_table_line->code, src_oper);
 		printf("src code address is: %d\n", code_table_line->address);
-		
+
 		/*adding the number after the label*/
 		src_oper = src_oper + strlen(label_name) + 1;
 		memset(&ten_bit_code, 0, sizeof(ten_bit_code));
@@ -432,7 +433,7 @@ void dst_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, a
 		ten_bit_code.ARE = 2;
 		bin_num = ten_bit_code.address << 2
 			| ten_bit_code.ARE;
-		
+
 		code_table_line->code = decimalToBin(bin_num);
 		code_table_line->address = (*IC - 1);
 		add_to_code_table(codetable, *code_table_line);
@@ -462,7 +463,7 @@ void src_dst_reg_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type sr
 }
 
 /*adds all data_image to the code table with address and binary conversion*/
-void data_image_to_code_table(long **data_image_ptr, CodeTable* codetable, long* IC, long *DC) {
+void data_image_to_code_table(long** data_image_ptr, CodeTable* codetable, long* IC, long* DC) {
 	int i = 0;
 	CodeTableEntry* code_table_line = malloc(sizeof(CodeTableEntry));
 	for (; i < *DC; i++) {
@@ -472,4 +473,16 @@ void data_image_to_code_table(long **data_image_ptr, CodeTable* codetable, long*
 		printf("data code : %s , address is: %d \n", code_table_line->code, code_table_line->address);
 		(*IC)++;
 	}
+}
+
+void freeCodeTable(CodeTable* table) {
+	int i;
+	CodeTableEntry* tmp = NULL;
+	char* chTmp = NULL;
+	for (i = 0; i < table->size; ++i) {
+		tmp = &(table->entries[i]);
+		chTmp = tmp->code;
+		free(chTmp);
+	}
+	free(table->entries);
 }

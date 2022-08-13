@@ -64,7 +64,10 @@ int main(int argc, char* argv[]) {
 		codetable.entries = NULL;
 		succeeded = process_file(argv[i], &symboltable, &codetable);
 		/* Line break if failed */
+		freeSymbolTable(&symboltable);
+		freeCodeTable(&codetable);
 	}
+
 	return 0;
 }
 
@@ -209,6 +212,7 @@ void line_handler(
 			/*dealing with entry in the second pass*/
 			if (directive_type == _entry) {
 				printf_line_error(ld, "ignoring labels in the beginning of .entry line");
+				free(label);
 			}
 
 			ld.line = ld.line + strlen(dir) + 1;
@@ -231,8 +235,7 @@ void line_handler(
 			line_to_table->type = _CODE;
 			/*add symbol to symboltable*/
 			add_to_table(symboltable, *line_to_table);
-		}
-
+		};
 		/*check if word is order from the order_list. If so, analyze the operands*/
 		if (is_order(ld)) {
 			/* check the structre of the order. return number of words this code is translated to*/
@@ -341,10 +344,10 @@ char* preAssemblerProccess(char* filename)
 	int macroFlag = 0;
 	char* macroBuffer = (char*)malloc(MAX_LINE_LENGTH);
 	char macroName[MAX_LINE_LENGTH];
-	char leadingWhiteSpace[MAX_LINE_LENGTH] ;
+	char leadingWhiteSpace[MAX_LINE_LENGTH];
 	char* concatWhiteSpaces = "";
-	macro *foundedMacro;
-	char *newFile = (char*) calloc(MAX_LINE_LENGTH * sizeof(char) , sizeof(char*));
+	macro* foundedMacro;
+	char* newFile = (char*)calloc(MAX_LINE_LENGTH * sizeof(char), sizeof(char*));
 	char* input_file;
 #pragma warning(suppress : 4996)
 	strcpy(newFile, "");
@@ -354,20 +357,20 @@ char* preAssemblerProccess(char* filename)
 
 	if (!(fd = fopen(input_file, "r")))
 	{
-		fprintf(stderr, "cannot open file\n");
+		fprintf(stderr, "cannot  open file\n");
 		exit(-10);
 	}
-	macroList *list = createNewMacroList();
+	macroList* list = createNewMacroList();
 	while (!feof(fd))
 	{
 		if (fgets(line, MAX_LINE_LENGTH, fd) != NULL)
 		{
-			strcpy(currWord, getFirstWordFromALine(line , currWord));
+			strcpy(currWord, getFirstWordFromALine(line, currWord));
 			if (macroFlag)
 			{
 				if (!isEndMacroLabel(currWord))
 				{
-					macroBuffer = (char*)realloc(macroBuffer, strlen(macroBuffer) + MAX_LINE_LENGTH*2);
+					macroBuffer = (char*)realloc(macroBuffer, strlen(macroBuffer) + MAX_LINE_LENGTH * 2);
 					strcat(macroBuffer, removeLeadingWhiteSpaces(line));
 					continue;
 				}
@@ -377,7 +380,7 @@ char* preAssemblerProccess(char* filename)
 					printf("macro added, key-%s \nval-> \n%s \n", macroName, macroBuffer);
 					PrintList(&list);
 					macroFlag = FALSE;
-					strcpy(macroBuffer,"");
+					strcpy(macroBuffer, "");
 					continue;
 				}
 			}
@@ -385,7 +388,7 @@ char* preAssemblerProccess(char* filename)
 			if (foundedMacro != NULL)
 			{
 				strcpy(leadingWhiteSpace, getLeadingWhiteSpace(line));
-				newFile = (char *)realloc(newFile, (strlen(newFile) + countLines(foundedMacro->val)) * 81 + 1);
+				newFile = (char*)realloc(newFile, (strlen(newFile) + countLines(foundedMacro->val)) * 81 + 1);
 				concatWhiteSpaces = concatWhiteSpacesPerEachLine(foundedMacro->val, leadingWhiteSpace);
 				strcat(newFile, concatWhiteSpaces);
 			}
@@ -394,7 +397,7 @@ char* preAssemblerProccess(char* filename)
 				macroFlag = TRUE;
 				strcpy(line, removeLeadingWhiteSpaces(line));
 				strcpy(line, line + (strlen(currWord) + 1));
-				strcpy(currWord, getFirstWordFromALine(line , currWord));
+				strcpy(currWord, getFirstWordFromALine(line, currWord));
 				strcpy(macroName, currWord);
 				if (checkIfMacroInList(macroName, &list))
 				{
@@ -403,24 +406,23 @@ char* preAssemblerProccess(char* filename)
 			}
 			else
 			{
-				newFile = (char*)realloc(newFile,  (strlen(newFile) + 81));
-				if (newFile== NULL) {
+				newFile = (char*)realloc(newFile, (strlen(newFile) + 81));
+				if (newFile == NULL) {
 					printf("Failed to alcote");
 				}
 				strcat(newFile, line);
 			}
 		}
 	}
-	printf("--------------------NEW MACRO FILE-------------------------\n%s\n" , newFile);
-	FILE *newFp;
-	input_file[strlen(input_file)-1] = 'm';
-    newFp = fopen(input_file, "w");
-	if(fputs(newFile, newFp) == EOF){
+	printf("--------------------NEW MACRO FILE-------------------------\n%s\n", newFile);
+	FILE* newFp;
+	input_file[strlen(input_file) - 1] = 'm';
+	newFp = fopen(input_file, "w");
+	if (fputs(newFile, newFp) == EOF) {
 		exit(-11);
 	};
 	freeMacroList(list);
 	free(macroBuffer);
-	free(concatWhiteSpaces);
 	fclose(newFp);
 	return input_file;
 }
