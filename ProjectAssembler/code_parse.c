@@ -145,10 +145,13 @@ void validate_operand_addressing(char** oper, long* L_ptr, line_details line, ad
 	while (isspace(*(line.line))) { ((line.line))++; }
 
 	/*get the dst_address name*/
-
 	*dst_oper = get_first_word(line.line);
 	printf("the dst: %s\n", *dst_oper);
 
+	/*in case there is only one operand after opcode, it supposed to be a dst operand*/
+	if (!(**dst_oper) && **src_oper) {
+		strcpy(*dst_oper, *src_oper);
+	}
 	/*check if opcode in the first group of opcodes, which means it gets 2 operands./
 	there are 5 opcode in this group.*/
 	for (i = 0; i < 5; i++) {
@@ -166,19 +169,20 @@ void validate_operand_addressing(char** oper, long* L_ptr, line_details line, ad
 	/*check if opcode in the second group of opcodes, which means it gets 1 operand./
 	there are 9 opcode in this group.*/
 	for (i = 0; i < 9; i++) {
-		cmp = strcmp(oper, second_order_group[i]);
+		cmp = strcmp(*oper, second_order_group[i]);
 		if (cmp == 0) {
 			printf("second");
-			*src_address = parse_operand_addressing_type(L_ptr, line, *src_oper, code_image_ptr, IC);
-			/*no dst address*/
-			*dst_address = NONE;
+			/*no src address*/
+			*src_address = NONE;
+			*dst_address = parse_operand_addressing_type(L_ptr, line, *src_oper, code_image_ptr, IC);
+
 			return;
 		}
 	}
-	/*check if opcode in the second group of opcodes, which means it gets 1 operand./
+	/*check if opcode in the third group of opcodes, which means it gets 1 operand./
 	there are 9 opcode in this group.*/
 	for (i = 0; i < 9; i++) {
-		cmp = strcmp(oper, second_order_group[i]);
+		cmp = strcmp(*oper, third_order_group[i]);
 		if (cmp == 0) {
 			printf("third");
 			/*no dst or src address*/
@@ -195,7 +199,7 @@ void validate_operand_addressing(char** oper, long* L_ptr, line_details line, ad
 
 void add_to_code_table(CodeTable* table, CodeTableEntry to_add) {
 	if (label_exists(table, &to_add)) {
-		printf("Exists"); /*TODO: print row numberand indicitive error*/
+		/*TODO: print row numberand indicitive error*/
 	}
 	table->size++;
 	if (!table->entries) {
@@ -219,6 +223,7 @@ void opcode_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add
 	int operand_num = 0;
 	int bin_num = 0;
 	code_structure ten_bit_code;
+	memset(&ten_bit_code, 0, sizeof(ten_bit_code));
 	/*gets the numeric value of an opcode*/
 	operand_num = get_order_num(opernad);
 	printf("order_num %d\n", operand_num);
@@ -238,21 +243,32 @@ void opcode_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add
 	add_to_code_table(codetable, *code_table_line);
 
 
-	printf("bin number: %s\n", code_table_line->code);
+	printf("opcode bin number: %s\n", code_table_line->code);
+	printf("adress opcode bin number: %d\n", code_table_line->address);
 
 }
 
 void src_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, addressing_type dst_add, char* src_oper, char* dst_oper, CodeTable* codetable, CodeTableEntry* code_table_line, SymbolTable* symboltable) {
 	code_structure ten_bit_code;
+	memset(&ten_bit_code, 0, sizeof(ten_bit_code));
 	int bin_num = 0;
+	char* neg_char = calloc(80, sizeof(char));
+	neg_char[0] = '-';
 	if (src_add == IMMEDIATE_ADD) {
-		ten_bit_code.address = src_oper[1];
+		if (*(src_oper + 1) == '-') {
+			ten_bit_code.address = atoi(strcat( neg_char, src_oper + 2));
+		}
+		else {
+			ten_bit_code.address = atoi(src_oper + 1);
+		}
 		ten_bit_code.ARE = 0;
 		bin_num = ten_bit_code.address << 2
 			| ten_bit_code.ARE;
 		code_table_line->code = decimalToBin(bin_num);
 		code_table_line->address = (*IC - *L_ptr + 1);
 		add_to_code_table(codetable, *code_table_line);
+		printf("src code: %s and word was: %s\n", code_table_line->code, src_oper);
+		printf("src code address is: %d\n", code_table_line->address);
 		return;
 	}
 
@@ -266,6 +282,8 @@ void src_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, a
 		code_table_line->code = decimalToBin(bin_num);
 		code_table_line->address = (*IC - *L_ptr + 1);
 		add_to_code_table(codetable, *code_table_line);
+		printf("src code: %s and word was: %s\n", code_table_line->code, src_oper);
+		printf("src code address is: %d\n", code_table_line->address);
 		return;
 	}
 
@@ -282,21 +300,28 @@ void src_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, a
 		
 		ten_bit_code.address = symbol_line->counter;
 		ten_bit_code.ARE = 2;
-		bin_num = ten_bit_code.src_reg_add << 2
+		bin_num = ten_bit_code.address << 2
 			| ten_bit_code.ARE;
 
 		code_table_line->code = decimalToBin(bin_num);
 		code_table_line->address = (*IC - *L_ptr + 1);
 		add_to_code_table(codetable, *code_table_line);
-
+		printf("src code: %s and word was: %s\n", code_table_line->code, src_oper);
+		printf("src code address is: %d\n", code_table_line->address);
+		
 		/*adding the number after the label*/
-		src_oper = src_oper + strlen(label_name);
-		bin_num = (int)src_oper[1];
+		src_oper = src_oper + strlen(label_name) + 1;
+		memset(&ten_bit_code, 0, sizeof(ten_bit_code));
+		ten_bit_code.address = atoi(src_oper);
+		ten_bit_code.ARE = 0;
+		bin_num = ten_bit_code.address << 2
+			| ten_bit_code.ARE;
 		memset(code_table_line, 0, sizeof(code_table_line));
 		code_table_line->code = decimalToBin(bin_num);
 		code_table_line->address = (*IC - *L_ptr + 2);
 		add_to_code_table(codetable, *code_table_line);
-
+		printf("src code: %s and word was: %s\n", code_table_line->code, src_oper);
+		printf("src code address is: %d\n", code_table_line->address);
 		return;
 	}
 
@@ -305,12 +330,14 @@ void src_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, a
 
 		ten_bit_code.address = symbol_line->counter;
 		ten_bit_code.ARE = 2;
-		bin_num = ten_bit_code.src_reg_add << 2
+		bin_num = ten_bit_code.address << 2
 			| ten_bit_code.ARE;
 
 		code_table_line->code = decimalToBin(bin_num);
 		code_table_line->address = (*IC - *L_ptr + 1);
 		add_to_code_table(codetable, *code_table_line);
+		printf("src code: %s and word was: %s\n", code_table_line->code, src_oper);
+		printf("src code address is: %d\n", code_table_line->address);
 		return;
 	}
 }
@@ -319,28 +346,40 @@ void src_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, a
 
 void dst_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, addressing_type dst_add, char* src_oper, char* dst_oper, CodeTable* codetable, CodeTableEntry* code_table_line, SymbolTable* symboltable) {
 	code_structure ten_bit_code;
+	memset(&ten_bit_code, 0, sizeof(ten_bit_code));
 	int bin_num = 0;
+	char* neg_char = calloc(80, sizeof(char));
+	neg_char[0] = '-';
 	if (dst_add == IMMEDIATE_ADD) {
-		ten_bit_code.address = src_oper[1];
+		if (*(dst_oper + 1) == '-') {
+			ten_bit_code.address = atoi(strcat(neg_char, dst_oper + 2));
+		}
+		else {
+			ten_bit_code.address = atoi(dst_oper + 1);
+		}
 		ten_bit_code.ARE = 0;
 		bin_num = ten_bit_code.address << 2
 			| ten_bit_code.ARE;
 		code_table_line->code = decimalToBin(bin_num);
-		code_table_line->address = (*IC - *L_ptr + 1);
+		code_table_line->address = (*IC - 1);
 		add_to_code_table(codetable, *code_table_line);
+		printf("dst code: %s and word was: %s\n", code_table_line->code, dst_oper);
+		printf("dst code address is: %d\n", code_table_line->address);
 		return;
 	}
 
 	if (dst_add == REGISTER_ADD) {
 		ten_bit_code.src_reg_add = 0;
-		ten_bit_code.dst_reg_add = src_oper[1];
+		ten_bit_code.dst_reg_add = dst_oper[1];
 		ten_bit_code.ARE = 0;
 		bin_num = ten_bit_code.src_reg_add << 6
 			| ten_bit_code.dst_reg_add << 2
 			| ten_bit_code.ARE;
 		code_table_line->code = decimalToBin(bin_num);
-		code_table_line->address = (*IC - *L_ptr + 1);
+		code_table_line->address = (*IC - 1);
 		add_to_code_table(codetable, *code_table_line);
+		printf("dst code: %s and word was: %s\n", code_table_line->code, dst_oper);
+		printf("dst code address is: %d\n", code_table_line->address);
 		return;
 	}
 
@@ -357,36 +396,80 @@ void dst_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, a
 
 		ten_bit_code.address = symbol_line->counter;
 		ten_bit_code.ARE = 2;
-		bin_num = ten_bit_code.src_reg_add << 2
+		bin_num = ten_bit_code.address << 2
 			| ten_bit_code.ARE;
 
 		code_table_line->code = decimalToBin(bin_num);
-		code_table_line->address = (*IC - *L_ptr + 1);
+		code_table_line->address = (*IC - 2);
 		add_to_code_table(codetable, *code_table_line);
 
 		/*adding the number after the label*/
 		dst_oper = dst_oper + strlen(label_name);
-		bin_num = (int)dst_oper[1];
+
+		memset(&ten_bit_code, 0, sizeof(ten_bit_code));
+		ten_bit_code.address = atoi(dst_oper);
+		ten_bit_code.ARE = 0;
+		bin_num = ten_bit_code.address << 2
+			| ten_bit_code.ARE;
 		memset(code_table_line, 0, sizeof(code_table_line));
 		code_table_line->code = decimalToBin(bin_num);
-		code_table_line->address = (*IC - *L_ptr + 2);
+		code_table_line->address = (*IC - 1);
 		add_to_code_table(codetable, *code_table_line);
-
+		printf("dst code: %s and word was: %s\n", code_table_line->code, dst_oper);
+		printf("dst code address is: %d\n", code_table_line->address);
 		return;
 	}
 
 	if (dst_add == DIRECT_ADD) {
 		SymbolTableEntry* symbol_line = find_label_from_table(symboltable, dst_oper);
-
-		ten_bit_code.address = symbol_line->counter;
+		if (symbol_line->type == 0) {
+			ten_bit_code.address = symbol_line->counter;
+		}
+		else if (symbol_line->type == 1)
+		{
+			ten_bit_code.address = symbol_line->counter;
+		}
 		ten_bit_code.ARE = 2;
-		bin_num = ten_bit_code.src_reg_add << 2
+		bin_num = ten_bit_code.address << 2
 			| ten_bit_code.ARE;
-
+		
 		code_table_line->code = decimalToBin(bin_num);
-		code_table_line->address = (*IC - *L_ptr + 1);
+		code_table_line->address = (*IC - 1);
 		add_to_code_table(codetable, *code_table_line);
+		printf("dst code: %s and word was: %s\n", code_table_line->code, dst_oper);
+		printf("dst code address is: %d\n", code_table_line->address);
 		return;
 	}
 }
 
+
+void src_dst_reg_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, addressing_type dst_add, char* src_oper, char* dst_oper, CodeTable* codetable, CodeTableEntry* code_table_line, SymbolTable* symboltable) {
+	code_structure ten_bit_code;
+	memset(&ten_bit_code, 0, sizeof(ten_bit_code));
+	int bin_num = 0;
+	ten_bit_code.src_reg_add = src_oper[1];
+	ten_bit_code.dst_reg_add = dst_oper[1];
+	ten_bit_code.ARE = 0;
+	bin_num = ten_bit_code.src_reg_add << 6
+		| ten_bit_code.dst_reg_add << 2
+		| ten_bit_code.ARE;
+	code_table_line->code = decimalToBin(bin_num);
+	code_table_line->address = (*IC - 1);
+	add_to_code_table(codetable, *code_table_line);
+	printf("src code: %s and word was: %s\n", code_table_line->code, src_oper);
+	printf("src code address is: %d\n", code_table_line->address);
+	return;
+}
+
+/*adds all data_image to the code table with address and binary conversion*/
+void data_image_to_code_table(long **data_image_ptr, CodeTable* codetable, long* IC, long *DC) {
+	int i = 0;
+	CodeTableEntry* code_table_line = malloc(sizeof(CodeTableEntry));
+	for (; i < *DC; i++) {
+		code_table_line->address = (*IC);
+		code_table_line->code = decimalToBin(data_image_ptr[i]);
+		add_to_code_table(codetable, *code_table_line);
+		printf("data code : %s , address is: %d \n", code_table_line->code, code_table_line->address);
+		(*IC)++;
+	}
+}
