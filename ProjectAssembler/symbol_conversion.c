@@ -7,32 +7,27 @@
 char symbols[32] = { '!','@','#','$','%','^','&','*','<','>','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v' };
 
 char* decimalToSymbolsBase(int num) {
-    int j, count = 0, sb = 0, position = 1, i = 0;
-    unsigned int abs = num;
-    char temp;
     char bin[10];
     static char SymbolsChars[3];
-    while (i < 10) {
+    int  pos = 1 ,count = 0, sb = 0, i = 0 , j;
+    unsigned int abs = num;
+    char temp;
+    for (; i < 10; i++)
+    {
         bin[i] = abs % 2 + '0';
         abs = abs / 2;
-        i++;
     }
     for (j = 0;j < 5;j++) {
         temp = bin[9 - j];
         bin[9 - j] = bin[j];
         bin[j] = temp;
     }
-    if (!SymbolsChars)
-    {
-        printf("`Dynamic allocation error.\0");
-        return NULL;
-    }
     for (i = 9;i > -1;i--) {
         sb += pow(2, count) * (bin[i] - '0');
         count++;
         if (count == 5) {
-            SymbolsChars[position] = symbols[sb];
-            position--;
+            SymbolsChars[pos] = symbols[sb];
+            pos--;
             count = 0;
 
             sb = 0;
@@ -42,28 +37,20 @@ char* decimalToSymbolsBase(int num) {
     return SymbolsChars;
 }
 
-
-
 char* binToSymbolsBase(char* bin) {
-    int count = 0;
+    int pos = 1;
     int num = 0;
+    int count = 0;
     int i = 0;
-    int position = 1;
     static char SymbolsChars[3];
-    if (!SymbolsChars)
-    {
-        printf("`Dynamic allocation error.\0");
-        return NULL;
-    }
     for (i = 9;i > -1;i--) {
         num += pow(2, count) * (bin[i] - '0');
         count++;
         if (count == 5) {
-            SymbolsChars[position] = symbols[num];
-            position--;
-            count = 0;
-
+            SymbolsChars[pos] = symbols[num];
             num = 0;
+            count = 0;
+            pos--;
         }
     }
     SymbolsChars[2] = '\0';

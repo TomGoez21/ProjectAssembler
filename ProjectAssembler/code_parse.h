@@ -167,4 +167,5 @@ void data_image_to_code_table(long** data_image_ptr, CodeTable* codetable, long*
  */
 void freeCodeTable(CodeTable* codetable);
 
+void src_dst_reg_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, addressing_type dst_add, char* src_oper, char* dst_oper, CodeTable* codetable, CodeTableEntry* code_table_line, SymbolTable* symboltable);
 #endif

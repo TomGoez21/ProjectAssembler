@@ -11,15 +11,15 @@
 #include "code_parse.h"
 #include "string_utils.h"
 #include "macro.h"
+#include "write_to_file.h"
 
 
 
 #define MAX_LINE_LENGTH 80
 #define MAX_DATA_IMAGE_LENGTH 2000
 #define MAX_CODE_IMAGE_LENGTH 2000
+#pragma warning(disable : 4996).
 char line[MAX_LINE_LENGTH] = { 0 };
-#pragma warning(disable : 4996)
-
 static bool process_file(char* filename, SymbolTable* symboltable, CodeTable* codetable);
 char* preAssemblerProccess(char* filename);
 void line_handler(
@@ -47,6 +47,8 @@ void line_handler_sec_pass(
 
 int main(int argc, char* argv[]) {
 	int i;
+	SymbolTable symboltable;
+	CodeTable codetable;
 
 	/* To break line if needed */
 	bool succeeded = true;
@@ -56,10 +58,8 @@ int main(int argc, char* argv[]) {
 		if (!succeeded) puts("");
 		argv[i] = preAssemblerProccess(argv[i]);
 		/* for each file name, send it for full processing. */
-		SymbolTable symboltable;
 		symboltable.size = 0;
 		symboltable.entries = NULL;
-		CodeTable codetable;
 		codetable.size = 0;
 		codetable.entries = NULL;
 		succeeded = process_file(argv[i], &symboltable, &codetable);
@@ -75,8 +75,9 @@ int main(int argc, char* argv[]) {
 bool process_file(char* filename, SymbolTable* symboltable, CodeTable* codetable) {
 	long IC = 100;
 	long DC = 0;
+	int i = 100;
 	/*long* data_image = (long*)calloc(1, sizeof(long));*/
-	//long* code_image = (long*)calloc(1, sizeof(long));
+	/*long* code_image = (long*)calloc(1, sizeof(long));*/
 	long* data_image[MAX_DATA_IMAGE_LENGTH] = { 0 };
 	long code_image[MAX_CODE_IMAGE_LENGTH][MAX_LINE_LENGTH] = { 0 };
 	unsigned int line_count = 0;
@@ -106,7 +107,6 @@ bool process_file(char* filename, SymbolTable* symboltable, CodeTable* codetable
 		printf("IC:%ld\n", IC);
 
 	}
-	int i = 100;
 	for (; i < IC; i++) {
 		printf("code image: %s\n", code_image[i]);
 	}
@@ -174,7 +174,8 @@ void line_handler(
 	ld.line = line;
 
 	/*gets a label. returns null if no label found*/
-	char* label = { 0 };
+	char* label;
+	label = '\0';
 	label = get_label(ld);
 	printf("\nlabel:%s\n", label);
 	printf("length label:%lu\n", strlen(label));
@@ -274,7 +275,8 @@ void line_handler_sec_pass(
 	ld.line = line;
 
 	/*gets a label. returns null if no label found*/
-	char* label = { 0 };
+	char* label;
+	label = '\0';
 	label = get_label(ld);
 	printf("\nlabel:%s\n", label);
 	printf("length label:%lu\n", strlen(label));
@@ -349,12 +351,10 @@ char* preAssemblerProccess(char* filename)
 	macro* foundedMacro;
 	char* newFile = (char*)calloc(MAX_LINE_LENGTH * sizeof(char), sizeof(char*));
 	char* input_file;
-#pragma warning(suppress : 4996)
 	strcpy(newFile, "");
 	strcpy(macroBuffer, "");
 	strcpy(leadingWhiteSpace, "");
 	input_file = cat_str(filename, ".as");
-
 	if (!(fd = fopen(input_file, "r")))
 	{
 		fprintf(stderr, "cannot  open file\n");

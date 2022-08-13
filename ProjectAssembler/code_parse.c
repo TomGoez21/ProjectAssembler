@@ -74,18 +74,18 @@ addressing_type parse_operand_addressing_type(long* L, line_details line, char* 
 
 		/*adding the label of the struct operand to code_image*/
 		if (*label_name) {
-			//*code_image_ptr = (long*)realloc(*code_image_ptr, (*IC + 1) * sizeof(long));
+			/**code_image_ptr = (long*)realloc(*code_image_ptr, (*IC + 1) * sizeof(long));*/
 			printf(" BEFORE: code in IC place: %s\n", code_image_ptr[*IC]);
 			printf(" BEFORE IC: %d\n", *IC);
-			//memcpy(code_image_ptr[*IC], label_name, sizeof(label_name));
+			/*memcpy(code_image_ptr[*IC], label_name, sizeof(label_name));*/
 			strncpy(code_image_ptr[*IC], label_name, sizeof(label_name));
-			//code_image_ptr[*IC] = *label_name;
+			/*code_image_ptr[*IC] = *label_name;*/
 			printf(" code in IC place: %s\n", code_image_ptr[*IC]);
 			printf(" IC: %d\n", *IC);
 			(*IC)++;
 			/*adding the strcut index to code_image*/
 			strcpy(code_image_ptr[*IC], operand_after_label + 1);
-			//code_image_ptr[*IC] = *(operand_after_label + 1);
+			/*code_image_ptr[*IC] = *(operand_after_label + 1);*/
 			printf(" code in IC place: %s\n", code_image_ptr[*IC]);
 			printf(" IC: %d\n", *IC);
 			(*IC)++;
@@ -124,7 +124,7 @@ void validate_operand_addressing(char** oper, long* L_ptr, line_details line, ad
 	*L_ptr += 1;
 
 	/*add operand to code_image*/
-	//*code_image_ptr = (long*)realloc(*code_image_ptr, (*IC + 1) * sizeof(long));
+	/*code_image_ptr = (long*)realloc(*code_image_ptr, (*IC + 1) * sizeof(long));*/
 	strcpy(code_image_ptr[*IC], *oper);
 	printf(" code in IC place: %s\n", code_image_ptr[*IC]);
 	printf(" IC: %d\n", *IC);

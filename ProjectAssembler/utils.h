@@ -80,7 +80,7 @@ bool is_legal_num(char* text);
 /*
  * Function:  get_first_word
  * --------------------
-/* Reads the first word of str, allocates memory for it and returns a copy of it 
+ * Reads the first word of str, allocates memory for it and returns a copy of it 
  *
  * input:
  *			char str - a string to cut the word from

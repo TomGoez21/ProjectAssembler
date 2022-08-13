@@ -1,7 +1,7 @@
-assembler : main.o directives.o code_parse.o symbol_table.o symbol_conversion.o orders.o label_check.o string_utils.o utils.o macro.o
-	gcc -g -ansi -Wall -pedantic main.o directives.o code_parse.o symbol_table.o symbol_conversion.o orders.o label_check.o string_utils.o utils.o macro.o -lm -o assembler
+assembler : main.o directives.o code_parse.o symbol_table.o symbol_conversion.o orders.o label_check.o string_utils.o utils.o macro.o write_to_file.o
+	gcc -g -ansi -Wall -pedantic main.o directives.o code_parse.o symbol_table.o symbol_conversion.o orders.o label_check.o string_utils.o utils.o macro.o write_to_file.o -lm -o assembler
 
-main.o : main.c directives.h code_parse.h symbol_table.h symbol_conversion.h orders.h label_check.h string_utils.h utils.h macro.h
+main.o : main.c directives.h code_parse.h symbol_table.h symbol_conversion.h orders.h label_check.h string_utils.h utils.h macro.h write_to_file.h 
 	gcc -c -ansi -Wall -pedantic main.c -o main.o
 
 directives.o: directives.c directives.h utils.h
@@ -30,3 +30,6 @@ label_check.o : label_check.c label_check.h utils.h
 
 macro.o : macro.c macro.h 
 	gcc -c -ansi -Wall -pedantic macro.c -o macro.o
+
+write_to_file.o : write_to_file.c write_to_file.h
+	gcc -c -ansi -Wall -pedantic write_to_file.c -o write_to_file.o
