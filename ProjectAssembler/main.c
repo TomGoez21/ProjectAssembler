@@ -62,7 +62,6 @@ int main(int argc, char* argv[]) {
 		CodeTable codetable;
 		codetable.size = 0;
 		codetable.entries = NULL;
-
 		succeeded = process_file(argv[i], &symboltable, &codetable);
 		/* Line break if failed */
 	}
@@ -133,7 +132,7 @@ bool process_file(char* filename, SymbolTable* symboltable, CodeTable* codetable
 	while (fgets(line, MAX_LINE_LENGTH, file_dst)) {
 		printf("\n-------------\n");
 		printf("line[%06d]: %s", ++line_count, line);
-		line_handler_sec_pass(symboltable, codetable, line_count, line, input_file, &DC, &IC, data_image, code_image);
+		line_handler_sec_pass(symboltable, codetable, line_count, line, filename, &DC, &IC, data_image, code_image);
 	}
 
 	i = 0;
@@ -328,12 +327,14 @@ char* preAssemblerProccess(char* filename)
 	char* concatWhiteSpaces = "";
 	macro *foundedMacro;
 	char *newFile = (char*) calloc(MAX_LINE_LENGTH * sizeof(char) , sizeof(char*));
+	char* input_file;
 #pragma warning(suppress : 4996)
 	strcpy(newFile, "");
 	strcpy(macroBuffer, "");
 	strcpy(leadingWhiteSpace, "");
-	
-	if (!(fd = fopen(filename, "r")))
+	input_file = cat_str(filename, ".as");
+
+	if (!(fd = fopen(input_file, "r")))
 	{
 		fprintf(stderr, "cannot  open file\n");
 		exit(-10);
@@ -394,8 +395,8 @@ char* preAssemblerProccess(char* filename)
 	}
 	printf("--------------------NEW MACRO FILE-------------------------\n%s\n" , newFile);
 	FILE *newFp;
-	filename[strlen(filename)-1] = 'm';
-    newFp = fopen(filename, "w");
+	input_file[strlen(input_file)-1] = 'm';
+    newFp = fopen(input_file, "w");
 	if(fputs(newFile, newFp) == EOF){
 		exit(-11);
 	};
@@ -403,5 +404,5 @@ char* preAssemblerProccess(char* filename)
 	free(macroBuffer);
 	free(concatWhiteSpaces);
 	fclose(newFp);
-	return filename;
+	return input_file;
 }
