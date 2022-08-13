@@ -6,7 +6,7 @@
 
 char symbols[32] = { '!','@','#','$','%','^','&','*','<','>','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v' };
 
-char * decimalToSymbolsBase(int num){    
+char *decimalToSymbolsBase(int num){    
     int j, count=0, sb=0, position=1, i=0;
     unsigned int abs = num;
     char temp;

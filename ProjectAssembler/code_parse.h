@@ -13,7 +13,7 @@ typedef enum adderssing_type {
 typedef struct code_structure {
 	unsigned int opcode : 4;
 	/*address - for immediate or label addressing*/
-	unsigned int address : 8;
+	int address : 8;
 	unsigned int src_reg_add : 4;
 	unsigned int dst_reg_add : 4;
 	unsigned int src_addressing : 2;
@@ -56,5 +56,7 @@ void opcode_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add
 void src_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, addressing_type dst_add, char* src_oper, char* dst_oper, CodeTable* codetable, CodeTableEntry* code_table_line, SymbolTable* symboltable);
 
 void dst_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, addressing_type dst_add, char* src_oper, char* dst_oper, CodeTable* codetable, CodeTableEntry* code_table_line, SymbolTable* symboltable);
+
+void data_image_to_code_table(long** data_image_ptr, CodeTable* codetable, long* IC, long* DC);
 
 #endif

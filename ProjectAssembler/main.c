@@ -134,6 +134,11 @@ bool process_file(char* filename, SymbolTable* symboltable, CodeTable* codetable
 		printf("line[%06d]: %s", ++line_count, line);
 		line_handler_sec_pass(symboltable, codetable, line_count, line, filename, &DC, &IC, data_image, code_image);
 	}
+	data_image_to_code_table(data_image, codetable, &IC, &DC);
+	
+	/*creates the .ob file*/
+	write_code_table_to_file(codetable, filename);
+
 
 	i = 0;
 	for (; i < codetable->size; i++) {
@@ -172,7 +177,12 @@ void line_handler(
 	printf("length label:%lu\n", strlen(label));
 
 	/*continue to the next word*/
-	ld.line = ld.line + strlen(label) + 1;
+	if (*label) {
+		ld.line = ld.line + strlen(label) + 1;
+	}
+	else {
+		ld.line = ld.line + strlen(label);
+	}
 	while (isspace(*(ld.line))) { (ld.line)++; }
 
 	printf("points after label to:%s\n", ld.line);
@@ -185,7 +195,7 @@ void line_handler(
 		printf("the directive is: %s\n", dir);
 		if (*label) {
 			if (directive_type == _string || directive_type == _data || directive_type == _struct) {
-				line_to_table->counter = *DC;
+				line_to_table->counter = *DC + *IC;
 				line_to_table->symbol_name = label;
 				line_to_table->type = _DATA;
 			}
@@ -227,6 +237,9 @@ void line_handler(
 		if (is_order(ld)) {
 			/* check the structre of the order. return number of words this code is translated to*/
 			validate_operand_addressing(&oper, &L, ld, &src_address, &dst_address, &src_oper, &dst_oper, code_image_ptr, IC);
+			if (src_address == REGISTER_ADD && dst_address == REGISTER_ADD) {
+				(*IC)--;
+			}
 		}
 	}
 }
@@ -264,7 +277,12 @@ void line_handler_sec_pass(
 	printf("length label:%lu\n", strlen(label));
 
 	/*continue to the next word*/
-	ld.line = ld.line + strlen(label) + 1;
+	if (*label) {
+		ld.line = ld.line + strlen(label) + 1;
+	}
+	else {
+		ld.line = ld.line + strlen(label);
+	}
 	while (isspace(*(ld.line))) { (ld.line)++; }
 
 	printf("points after label to:%s\n", ld.line);
@@ -301,12 +319,12 @@ void line_handler_sec_pass(
 			validate_operand_addressing(&oper, &L, ld, &src_address, &dst_address, &src_oper, &dst_oper, code_image_ptr, IC);
 			opcode_to_bin(&L, IC, oper, src_address, dst_address, src_oper, dst_oper, codetable, code_table_line);
 			if (src_address == REGISTER_ADD && dst_address == REGISTER_ADD) {
-				printf("regester src & dst");
+				(*IC)--;
+				src_dst_reg_to_bin(&L, IC, oper, src_address, dst_address, src_oper, dst_oper, codetable, code_table_line, symboltable);
 			}
 			else {
 				src_to_bin(&L, IC, oper, src_address, dst_address, src_oper, dst_oper, codetable, code_table_line, symboltable);
 				dst_to_bin(&L, IC, oper, src_address, dst_address, src_oper, dst_oper, codetable, code_table_line, symboltable);
-			
 			}
 		}
 	}
@@ -336,7 +354,7 @@ char* preAssemblerProccess(char* filename)
 
 	if (!(fd = fopen(input_file, "r")))
 	{
-		fprintf(stderr, "cannot  open file\n");
+		fprintf(stderr, "cannot open file\n");
 		exit(-10);
 	}
 	macroList *list = createNewMacroList();

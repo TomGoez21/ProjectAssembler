@@ -18,7 +18,7 @@ bool label_exists(SymbolTable* table, SymbolTableEntry* to_add) {
 
 void add_to_table(SymbolTable* table, SymbolTableEntry to_add) {
 	if (label_exists(table, &to_add)) {
-		printf("Exists"); /*TODO: print row numberand indicitive error*/ 
+		/*TODO: print row numberand indicitive error*/ 
 	}
 	table->size++;
 	if (!table->entries) {
