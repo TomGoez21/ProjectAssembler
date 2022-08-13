@@ -64,23 +64,12 @@ void string_handler(line_details line, char* begin, long *DC, long** data_image_
 
 	/*insert data to the data list*/
 	while (*begin && *begin != '"') {
-		/*printf("*DC=%d *data_image_ptr=%x, value of data_image = %s\n", *DC, *data_image_ptr, *data_image_ptr);*/
-		/**data_image_ptr = (long*)realloc(*data_image_ptr, (*DC + 1) * sizeof(long));
-		if (!(*data_image_ptr)) {
-			printf_line_error(line, "unable to reallocate memory for data_image");
-		}
-		*/
-
 		data_image_ptr[*DC] = *begin;
-		printf(" data in DC place: %c\n", data_image_ptr[*DC]);
-		printf(" DC: %d\n", *DC);
 		begin++;
 		(*DC)++;
 	}
 
 	/* add \0 to the end of string in data image */
-	/**data_image_ptr = (long*)realloc(data_image_ptr, (*DC + 1) * sizeof(long));*/
-	/*TODO: checkand print error*/
 	data_image_ptr[*DC] = '\0';
 	(*DC)++;
 
@@ -114,8 +103,6 @@ void data_handler(line_details line, char* begin, long *DC, long** data_image_pt
 		return;
 	}
 	/* Insert the data into data_image */
-	/**data_image_ptr = (long*)realloc(data_image_ptr, (*DC + 1) * sizeof(long));*/
-	/*TODO: checkand print error*/
 	data_image_ptr[*DC] = num;
 	(*DC)++;
 
@@ -134,7 +121,6 @@ void data_handler(line_details line, char* begin, long *DC, long** data_image_pt
 		begin += ilen;
 
 		while (isspace(*begin)) { begin++; }
-		printf("%c\n", *begin);
 
 		if (*begin != ',' && *begin != 0) {
 			printf_line_error(line, "not an integer");
@@ -142,8 +128,6 @@ void data_handler(line_details line, char* begin, long *DC, long** data_image_pt
 		}
 
 		/* Insert the data into data_image */
-		/**data_image_ptr = (long*)realloc(data_image_ptr, (*DC + 1) * sizeof(long));*/
-		/*TODO: checkand print error*/
 		data_image_ptr[*DC] = num;
 		(*DC)++;
 
@@ -170,8 +154,6 @@ void struct_handler(line_details line, char* begin, long *DC, long** data_image_
 		return;
 	}
 	/* Insert the data into data_image*/
-	/**data_image_ptr = (long*)realloc(data_image_ptr, (*DC + 1) * sizeof(long));*/
-	/*TODO: checkand print error*/
 	data_image_ptr[*DC] = num;
 	(*DC)++;
 
@@ -184,13 +166,6 @@ void struct_handler(line_details line, char* begin, long *DC, long** data_image_
 	}
 }
 
-void entry_handler(line_details line, char* begin, long *DC, long** data_image_ptr){
-	/*TODO: iterate over the symbol table and mark the label_type as entry*/
-}
-
-void extern_handler(line_details line, char* begin, long *DC, long** data_image_ptr){
-	/*TODO: iterate over the symbol table and mark the label_type as entry*/
-}
 
 bool is_directive(char* line) {
 	bool is_directive = true;

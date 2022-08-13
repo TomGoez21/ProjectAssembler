@@ -17,8 +17,8 @@ bool label_exists(SymbolTable* table, SymbolTableEntry* to_add) {
 }
 
 void add_to_table(SymbolTable* table, SymbolTableEntry to_add) {
-	if (label_exists(table, &to_add)) {
-		/*TODO: print row numberand indicitive error*/ 
+	if (label_exists(table, &to_add) && to_add.type == _ENTRY) {
+		fprintf(stderr, "label %s already exists in symbol table\n", to_add.symbol_name);
 	}
 	table->size++;
 	if (!table->entries) {
@@ -30,7 +30,7 @@ void add_to_table(SymbolTable* table, SymbolTableEntry to_add) {
 		table->entries = (SymbolTableEntry*)realloc(table->entries, table->size * sizeof(SymbolTableEntry));
 	}
 	if (!table->entries) {
-		printf("Memory allocation failed.");
+		fprintf(stderr, "Memory allocation failed\n");
 		exit(1);
 	}
 	/* (Shallow) copy the new entry to the table*/
