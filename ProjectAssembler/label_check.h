@@ -1,7 +1,8 @@
 #ifndef LABEL_CHECK_H_
 #define LABEL_CHECK_H_
-
 #define MAX_LABEL_LENGTH 30
+
+#include "code_parse.h"
 
 char* get_order(line_details line);
 
@@ -27,6 +28,7 @@ int* get_order_num(char* order);
  * Returns: 1 if text equals to order from order_list
  */
 bool is_order(line_details line);
+void check_src_dst_per_opcode(char* opcode, addressing_type src_add, addressing_type dst_add, line_details line);
 
 
 

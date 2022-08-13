@@ -35,7 +35,7 @@ char* cat_str(char* str0, char* str1) {
 void* check_malloc(long size) {
 	void* ptr = malloc(size);
 	if (ptr == NULL) {
-		printf("Memory allocation failed.");
+		fprintf(stderr, "Memory allocation failed");
 		exit(1);
 	}
 	return ptr;
@@ -65,12 +65,13 @@ bool is_legal_num(char* text) {
 
 /* Reads the first word of str, allocates memory for it and returns a copy of it */
 char* get_first_word(char* str) {
+	while (isspace(*(str))) { ((str))++; }
 	char* word; /* Points to the beginning of the copy of the word */
 	int w_len = 0; /* The word's length */
 	int allocated = INITIAL_ALLOCATED_SIZE; /* Number of allocated bytes */
 	word = (char*)malloc(allocated); /* Initial allocation */
 	if (!word) { /* Checks for successful allocation */
-		/*TODO: error*/
+		fprintf(stderr, "could not allocate memory for the coming word");
 	}
 	/* Read until whitespace, comma or EOF, copy contents into `word` */
 	while (*str && !isspace(*str) && *str != ',') {
@@ -78,7 +79,7 @@ char* get_first_word(char* str) {
 		if (w_len >= allocated - 1) {
 			word = realloc(word, allocated *= 2);
 			if (!word) { /* Checks for successful allocation */
-				/*TODO: error*/
+				fprintf(stderr, "could not reallocate memory for the coming word");
 			}
 		}
 		word[w_len++] = *str++;

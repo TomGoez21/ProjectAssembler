@@ -13,23 +13,13 @@ typedef enum adderssing_type {
 typedef struct code_structure {
 	unsigned int opcode : 4;
 	/*address - for immediate or label addressing*/
-	unsigned int address : 8;
+	int address : 8;
 	unsigned int src_reg_add : 4;
 	unsigned int dst_reg_add : 4;
 	unsigned int src_addressing : 2;
 	unsigned int dest_addressing : 2;
 	unsigned int ARE : 2;
 } code_structure;
-
-/*TODO: do we want to use it?*/
-typedef struct binary_line {
-	line_details line;
-	int first_word_address;
-	int num_of_words;
-	char* first_operand_name;
-	char* second_operand_name;
-	code_structure word[5];
-} binary_line;
 
 
 typedef struct CodeTableEntry {
@@ -64,10 +54,11 @@ void add_to_code_table(CodeTable* table, CodeTableEntry to_add);
  *			char* operand
  *			long code_image_ptr[][80]
  *			long* IC - image counter
- *			
+ *
  */
 addressing_type parse_operand_addressing_type(long* L, line_details line, char* operand, long code_image_ptr[][80], long* IC);
 
+int operands_check(line_details line, long* code_image_ptr, long* IC);
 
 /*
  * Function:  validate_operand_addressing
@@ -121,25 +112,9 @@ void opcode_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add
  *			CodeTableEntry* code_table_line
  *
  */
-void src_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, addressing_type dst_add, char* src_oper, char* dst_oper, CodeTable* codetable, CodeTableEntry* code_table_line, SymbolTable* symboltable);
 
 
-/*
- * Function:  dst_to_bin
- * --------------------
- * convert the dst_oper to binary and store it on the code_table_line(struct)
- *
- * input:	long* L
- *			line_details line (struct for line info)
- *			addressing_type* src_address
- *			addressing_type* dst_address
- *			char* src_oper
- *			char* dst_oper
- *			CodeTable* codetable
- *			CodeTableEntry* code_table_line
- *
- */
-void dst_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, addressing_type dst_add, char* src_oper, char* dst_oper, CodeTable* codetable, CodeTableEntry* code_table_line, SymbolTable* symboltable);
+void dst_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, addressing_type dst_add, char* src_oper, char* dst_oper, CodeTable* codetable, CodeTableEntry* code_table_line, SymbolTable* symboltable, char* extern_filename);
 
 
 /*

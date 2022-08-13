@@ -37,7 +37,6 @@ int Sempty(macroList* temp) {
 
 void AddToMacroList(macro* m, macroList** list) {
     macroList* new;
-    printf("key -> %s \n val ->\n%s\n", m->key , m->val);
     new = (macroList*)malloc(sizeof(macroList));
     new->data = m;
     new->next = *list;
@@ -56,7 +55,6 @@ int checkIfMacroInList(char* word, macroList** list) {
         while (temp->size > 0) {
             curr = temp->data;
             if (!strcmp((curr->key), word)) {
-                printf(" key :%s , word: %s\n", curr->key, word);
                 return TRUE;
             }
             temp = temp->next;
@@ -68,14 +66,11 @@ void PrintList(macroList** list) {
     macroList* temp;
     macro* curr;
     temp = *list;
-    printf("list size - %d \n", (*list)->size);
     if (Sempty(temp))
         printf("\nThe stack is empty!");
     else {
         while (temp->size > 0) {
             curr = temp->data;
-            printf(" key :%s\n", curr->key);
-            printf(" val :\n%s\n", curr->val);
             temp = temp->next;
         }
     }
@@ -90,7 +85,6 @@ macro* getFromMacroList(char* word, macroList** list) {
         while (temp->size > 0) {
             curr = temp->data;
             if (!strcmp((curr->key), word)) {
-                printf(" key :%s , val: \n%s\n", curr->key, curr->val);
                 return curr;
             }
             temp = temp->next;

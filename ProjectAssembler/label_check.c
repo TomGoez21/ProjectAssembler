@@ -8,6 +8,7 @@
 #include <string.h>
 #include "label_check.h"
 #include "utils.h"
+#include "code_parse.h"
 
 
 char* directive_list[5] = { "data","string","struct","entry","extern" };
@@ -41,6 +42,9 @@ char* get_order(line_details line) {
 		if (cmp == 0) {
 			return order;
 		}
+		else {
+			printf_line_error(line, "%s : not an order", order);
+		}
 	}
 	return order;
 }
@@ -50,7 +54,7 @@ bool is_order(line_details line) {
 	int i;
 	int j;
 	int cmp = 0;
-	char order[5] = { 0 };
+	char order[10] = { 0 };
 	while (isspace(*(line.line))) { ((line.line))++; }
 	for (j = 0; line.line[j] != ' ' && line.line[j]; j++) {
 		order[j] = line.line[j];
@@ -69,21 +73,21 @@ bool is_order(line_details line) {
 bool is_reserved_word(line_details line, char* text) {
 	int i;
 	for (i = 0; i < NUM_DIRECTIVES; i++) {
-		if (!strncmp(text, directive_list[i], strlen(text))) {
+		if (*text && strncmp(text, directive_list[i], strlen(text)) == 0) {
 			printf_line_error(line, "directive reserved paramater");
 			return true;
 		}
 	}
 
 	for (i = 0; i < NUM_ORDERS; i++) {
-		if (!strncmp(text, order_list[i], strlen(text))) {
+		if (*text && strncmp(text, order_list[i], strlen(text)) == 0) {
 			printf_line_error(line, "order reserved paramater");
 			return true;
 		}
 	}
 
 	for (i = 0; i < NUM_REGERSITERS; i++) {
-		if (!strncmp(text, reg_list[i], strlen(text))) {
+		if (*text && strncmp(text, reg_list[i], strlen(text)) == 0) {
 			printf_line_error(line, "register reserved paramater");
 			return true;
 		}
@@ -97,15 +101,18 @@ bool is_label_valid(line_details line, char* text) {
 	bool is_alphnumeric = true;
 	int i;
 	/*check each char in the string if it is non alphanumeric char*/
-	for (i = 0; text[i] != ':' && text[i]; i++) {
+	for (i = 0; text[i] != ':' && text[i] && text[i] != ' '; i++) {
 		is_alphnumeric = is_alphnumeric && (isalpha(text[i]) || isdigit(text[i]));
 		if (!is_alphnumeric) { break; }
+	}
+
+	if (text[i] != ':') {
+		return false;
 	}
 
 	is_valid_label &= is_alphnumeric;
 	is_valid_label &= strlen(text) <= MAX_LABEL_LENGTH;
 	is_valid_label &= (isalpha(text[0]) > 0);
-	is_valid_label &= (text[i] == ':');
 	is_valid_label &= !is_reserved_word(line, text);
 
 	return is_valid_label;
@@ -169,7 +176,7 @@ char* get_label(line_details line) {
 	int i = 0;
 	label = (char*)malloc(30);
 	if (!label) {
-		/*TODO: Print error*/ 
+		printf_line_error(line, "cannot allocate memory for label");
 		exit(1);
 	}
 
@@ -184,7 +191,41 @@ char* get_label(line_details line) {
 	return label;
 	}
 	label[i] = '\0';
-	printf("label in that point %c\n", *label);
 	return label;
 
 }
+
+/*checks whether the src and dst operands are ligal for the current opcode*/
+void check_src_dst_per_opcode(char* opcode, addressing_type src_add, addressing_type dst_add, line_details line){
+	if ((strcmp(opcode, "mov") == 0) || (strcmp(opcode, "add") == 0) || (strcmp(opcode, "sub") == 0)) {
+		if (!(src_add == 0 || src_add == 1 || src_add == 2 || src_add == 3) || !(dst_add == 1 || dst_add == 2 || dst_add == 3)) {
+			printf_line_error(line , "addressing type doesnt match opecode type");
+		}
+	}
+	else if (strcmp(opcode, "cmp") == 0) {
+		if (!(src_add == 0 || src_add == 1 || src_add == 2 || src_add == 3) || !(dst_add == 0 || dst_add == 1 || dst_add == 2 || dst_add == 3)) {
+			printf_line_error(line, "addressing type doesnt match opecode type");
+		}
+	}
+	else if ((strcmp(opcode, "not") == 0) || (strcmp(opcode, "clr") == 0) || (strcmp(opcode, "inc") == 0) || (strcmp(opcode, "dec") == 0) || (strcmp(opcode, "jmp") == 0) || (strcmp(opcode, "bne") == 0) || (strcmp(opcode, "get") == 0) || (strcmp(opcode, "jsr") == 0)) {
+		if (!(src_add == 4) || !(dst_add == 1 || dst_add == 2 || dst_add == 3)) {
+			printf_line_error(line, "addressing type doesnt match opecode type");
+		}
+	}
+	else if (strcmp(opcode, "lea") == 0) {
+		if (!(src_add == 1 || src_add == 2) || !(dst_add == 1 || dst_add == 2 || dst_add == 3)) {
+			printf_line_error(line, "addressing type doesnt match opecode type");
+		}
+	}
+	else if (strcmp(opcode, "prn") == 0) {
+		if (!(src_add == 4) || !(dst_add == 0 || dst_add == 1 || dst_add == 2 || dst_add == 3)) {
+			printf_line_error(line, "addressing type doesnt match opecode type");
+		}
+	}
+	else if ((strcmp(opcode, "rts") == 0) || (strcmp(opcode, "hlt") == 0)) {
+		if (!(src_add == 4) || !(dst_add == 4)) {
+			printf_line_error(line, "addressing type doesnt match opecode type");
+		}
+	}
+}
+
