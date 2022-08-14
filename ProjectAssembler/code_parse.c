@@ -213,9 +213,11 @@ void opcode_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add
 
 void src_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, addressing_type dst_add, char* src_oper, char* dst_oper, CodeTable* codetable, CodeTableEntry* code_table_line, SymbolTable* symboltable, char* extern_filename) {
 	code_structure ten_bit_code;
+	char* neg_char;
+	int bin_num;
 	memset(&ten_bit_code, 0, sizeof(ten_bit_code));
-	int bin_num = 0;
-	char* neg_char = calloc(80, sizeof(char));
+	bin_num = 0;
+	neg_char = calloc(80, sizeof(char));
 	neg_char[0] = '-';
 	if (src_add == IMMEDIATE_ADD) {
 		if (*(src_oper + 1) == '-') {
@@ -299,9 +301,11 @@ void src_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, a
 
 void dst_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, addressing_type dst_add, char* src_oper, char* dst_oper, CodeTable* codetable, CodeTableEntry* code_table_line, SymbolTable* symboltable, char* extern_filename) {
 	code_structure ten_bit_code;
+	int bin_num;
+	char* neg_char;
 	memset(&ten_bit_code, 0, sizeof(ten_bit_code));
-	int bin_num = 0;
-	char* neg_char = calloc(80, sizeof(char));
+	bin_num = 0;
+	neg_char = calloc(80, sizeof(char));
 	neg_char[0] = '-';
 	if (dst_add == IMMEDIATE_ADD) {
 		if (*(dst_oper + 1) == '-') {
@@ -397,8 +401,9 @@ void dst_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, a
 
 void src_dst_reg_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, addressing_type dst_add, char* src_oper, char* dst_oper, CodeTable* codetable, CodeTableEntry* code_table_line, SymbolTable* symboltable) {
 	code_structure ten_bit_code;
+	int bin_num;
 	memset(&ten_bit_code, 0, sizeof(ten_bit_code));
-	int bin_num = 0;
+	bin_num = 0;
 	ten_bit_code.src_reg_add = src_oper[1];
 	ten_bit_code.dst_reg_add = dst_oper[1];
 	ten_bit_code.ARE = 0;

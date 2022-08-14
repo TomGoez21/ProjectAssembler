@@ -112,8 +112,24 @@ void opcode_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add
  *			CodeTableEntry* code_table_line
  *
  */
+void src_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, addressing_type dst_add, char* src_oper, char* dst_oper, CodeTable* codetable, CodeTableEntry* code_table_line, SymbolTable* symboltable, char* extern_filename);
 
 
+/*
+ * Function:  dst_to_bin
+ * --------------------
+ * convert the src_oper to binary and store it on the code_table_line(struct)
+ *
+ * input:	long* L
+ *			line_details line (struct for line info)
+ *			addressing_type* src_address
+ *			addressing_type* dst_address
+ *			char* src_oper
+ *			char* dst_oper
+ *			CodeTable* codetable
+ *			CodeTableEntry* code_table_line
+ *
+ */
 void dst_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, addressing_type dst_add, char* src_oper, char* dst_oper, CodeTable* codetable, CodeTableEntry* code_table_line, SymbolTable* symboltable, char* extern_filename);
 
 

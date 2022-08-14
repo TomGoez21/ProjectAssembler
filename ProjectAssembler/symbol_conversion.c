@@ -76,7 +76,7 @@ char* decimalToBin(int num) {
     char* bin = (char*)calloc(11, sizeof(char));
     if (!bin)
     {
-        printf("`Dynamic allocation error.\0");
+        printf("`Dynamic allocation error.");
         return NULL;
     }
     while (i < 10) {

@@ -54,7 +54,7 @@ bool is_legal_num(char* text) {
 	if (text[0] == '-' || text[0] == '+') {
 		text++;
 	}
-	for (i; i <= (int)(strlen(text)); i++) {
+	for(; i <= (int)(strlen(text)); i++){
 		if (isdigit(text[i])) {
 			return true;
 		}
@@ -65,10 +65,12 @@ bool is_legal_num(char* text) {
 
 /* Reads the first word of str, allocates memory for it and returns a copy of it */
 char* get_first_word(char* str) {
-	while (isspace(*(str))) { ((str))++; }
+	int allocated;
+	int w_len;
 	char* word; /* Points to the beginning of the copy of the word */
-	int w_len = 0; /* The word's length */
-	int allocated = INITIAL_ALLOCATED_SIZE; /* Number of allocated bytes */
+	while (isspace(*(str))) { ((str))++; }
+	w_len = 0; /* The word's length */
+	allocated = INITIAL_ALLOCATED_SIZE; /* Number of allocated bytes */
 	word = (char*)malloc(allocated); /* Initial allocation */
 	if (!word) { /* Checks for successful allocation */
 		fprintf(stderr, "could not allocate memory for the coming word");

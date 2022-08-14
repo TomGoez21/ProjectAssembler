@@ -16,7 +16,7 @@ char* order_list[16] = { "mov","cmp","add","sub","not","clr","lea","inc","dec","
 char* reg_list[8] = { "r0","r1","r2","r3","r4","r5","r6","r7" };
 
 /*gets the decimal value of an order*/
-int* get_order_num(char* order) {
+int get_order_num(char* order) {
 	int i;
 	int cmp;
 	for (i = 0; i < NUM_ORDERS; i++) {
@@ -25,10 +25,12 @@ int* get_order_num(char* order) {
 			return i;
 		}
 	}
+	return i;
 }
 
 /*extract order from text*/
-char* get_order(line_details line) {
+
+/*char* get_order(line_details line) {
 	int i;
 	int j;
 	int cmp;
@@ -47,7 +49,7 @@ char* get_order(line_details line) {
 		}
 	}
 	return order;
-}
+}*/
 
 /*check if text is one of the orders from order_list*/
 bool is_order(line_details line) {
@@ -97,9 +99,11 @@ bool is_reserved_word(line_details line, char* text) {
 
 bool is_label_valid(line_details line, char* text) {
 	/* Check if the first char is alpha, length less than 30, all the others are alphanumeric, and that the label doesnt already exsits*/
-	bool is_valid_label = true;
-	bool is_alphnumeric = true;
+	bool is_valid_label;
+	bool is_alphnumeric;
 	int i;
+	is_valid_label = true;
+	is_alphnumeric = true;
 	/*check each char in the string if it is non alphanumeric char*/
 	for (i = 0; text[i] != ':' && text[i] && text[i] != ' '; i++) {
 		is_alphnumeric = is_alphnumeric && (isalpha(text[i]) || isdigit(text[i]));
@@ -121,9 +125,11 @@ bool is_label_valid(line_details line, char* text) {
 
 bool is_label_valid_in_struct(line_details line, char* text) {
 	/* Check if the first char is alpha, length less than 30, all the others are alphanumeric, and that the label doesnt already exsits*/
-	bool is_valid_label = true;
-	bool is_alphnumeric = true;
+	bool is_valid_label;
+	bool is_alphnumeric;
 	int i;
+	is_alphnumeric = true;
+	is_valid_label = true;
 	/*check each char in the string if it is non alphanumeric char*/
 	for (i = 0; text[i] != '.' && text[i]; i++) {
 		is_alphnumeric = is_alphnumeric && (isalpha(text[i]) || isdigit(text[i]));
@@ -173,6 +179,7 @@ char* get_label_in_struct(char* text, char* label_name) {
 
 char* get_label(line_details line) {
 	char* label = { 0 };
+	bool is_label;
 	int i = 0;
 	label = (char*)malloc(30);
 	if (!label) {
@@ -180,11 +187,11 @@ char* get_label(line_details line) {
 		exit(1);
 	}
 
-	bool is_label = true;
+	is_label = true;
 	while (isspace(*(line.line))) { (line.line)++; }
 	is_label = is_label_valid(line, line.line);
 	if (is_label) {
-		for (i; line.line[i] != ':'; i++) {
+		for(; line.line[i] != ':'; i++){
 			label[i] = line.line[i];
 		}
 	label[i] = '\0';

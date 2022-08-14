@@ -35,10 +35,8 @@ char* getFirstWordFromALine(char* line , char* currWord)
 {
     static char word[80] = {0};
     word[0] = '\0';
-#pragma warning(suppress : 4996)
     strcpy(word, line);
-#pragma warning(suppress : 4996)
-    strcpy (currWord  , removeLeadingWhiteSpaces(&word));
+    strcpy (currWord  , removeLeadingWhiteSpaces(word));
     strcpy(currWord, getEndOfWord(currWord));
     strcpy(currWord, removeEndWhiteSpaces(currWord));
     return currWord;
@@ -95,19 +93,17 @@ char* getLeadingWhiteSpace(char* line) {
 char* concatWhiteSpacesPerEachLine(char* str, char* whiteSpace) 
 {
     char static whitSpaceLine[80] = "";
-    int i;
-    int len;
+    int i ,j;
     int lines;
-    int j = 0;
-    int k = strlen(whiteSpace);
-    len = strlen(str);
+    char* buffer;
+    j = 0;
     lines = countLines(str);
-    char* buffer = (char*)malloc(sizeof(char) * lines * 81);
+    buffer = (char*)malloc(sizeof(char) * lines * 81);
     strcpy(buffer,"");
     strcpy(whitSpaceLine, whiteSpace);
     lines--;
     j = strlen(whiteSpace);
-    for (i = 0;str[i] != '\0';i++)
+    for(i = 0;str[i] != '\0';i++)
     {
         if (str[i] == '\n') {
             strcat(buffer, whitSpaceLine);

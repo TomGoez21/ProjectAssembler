@@ -29,16 +29,18 @@ directive str_to_directive(char* str) {
 
 /*Checks type of directive*/
 directive find_directive_type(line_details line, char* begin, char *directive_string) {
+	int space_index;
+	directive d;
 	while (isspace(*begin)) { begin++; }
 	if (*begin++ != '.') {
 		printf_line_error(line, "directive should start with period");
 		return _invalid;
 	}
 
-	int space_index = strcspn(begin, " ");
+	space_index = strcspn(begin, " ");
 	strncpy(directive_string, begin, space_index);
 
-	directive d = str_to_directive(directive_string);
+	d = str_to_directive(directive_string);
 	if (d == _invalid) {
 		printf_line_error(line, "invalid directive %s", directive_string);
 	}
@@ -49,13 +51,14 @@ directive find_directive_type(line_details line, char* begin, char *directive_st
 
 /*Handles string directive, 'begin' points to the first character*/
 void string_handler(line_details line, char* begin, long *DC, long** data_image_ptr) {
+	char* last_quot;
 	while (isspace(*begin)) { begin++; }
 	/* Checks if the string argument has leading quotation marks */
 	if (*begin++ != '"') {
 		printf_line_error(line, "String directive should start with quotation marks");
 		return;
 	}
-	char* last_quot = strrchr(begin, '"');
+	last_quot = strrchr(begin, '"');
 
 	if (!last_quot) {
 		printf_line_error(line, "String should end quotation marks");

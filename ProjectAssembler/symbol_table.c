@@ -45,6 +45,7 @@ SymbolTableEntry* find_label_from_table(SymbolTable* table, char* label) {
 			return &table->entries[i];
 		}
 	}
+	return NULL;
 }
 
 void freeSymbolTable(SymbolTable* table) {

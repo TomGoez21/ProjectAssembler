@@ -15,7 +15,7 @@ char* get_order(line_details line);
  *
  * Returns: the number of the order from the order_list
  */
-int* get_order_num(char* order);
+int get_order_num(char* order);
 
 
 /*
