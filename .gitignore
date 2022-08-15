@@ -362,16 +362,11 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /.vscode
+
+
 /ProjectAssembler/assembler
-/ProjectAssembler/code_parse.o
-/ProjectAssembler/label_check.o
-/ProjectAssembler/directives.o
-/ProjectAssembler/macro.o
-/ProjectAssembler/orders.o
-/ProjectAssembler/main.o
-/ProjectAssembler/string_utils.o
-/ProjectAssembler/symbol_conversion.o
-/ProjectAssembler/symbol_table.o
-/ProjectAssembler/utils.o
+*.o
 /assembly_exmp1
-/assembly_exmp1.asam
+*.asam
+*.am
+*.as
