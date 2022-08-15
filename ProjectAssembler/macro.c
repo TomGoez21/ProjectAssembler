@@ -11,7 +11,7 @@ macro* createNewMacro(char* key, char* val) {
     new = (macro*)malloc(sizeof(macro));
     strcpy(new->key, key);
     tempVal = new->val;
-    tempVal =(char*) malloc(strlen(val)+81);
+    tempVal =(char*) malloc(strlen(val)+MAX_LINE_LENGTH);
     tempVal[0] = '\0';
     strcpy(tempVal,val);
     new->val = tempVal;

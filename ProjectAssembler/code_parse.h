@@ -1,5 +1,6 @@
 #ifndef CODE_PARSE_H_
 #define CODE_PARSE_H_
+#define MAX_LINE_LENGTH 82
 
 #include "utils.h"
 #include "symbol_table.h"
@@ -52,11 +53,11 @@ void add_to_code_table(CodeTable* table, CodeTableEntry to_add);
  * input:	long* L
  *			line_details line (struct for line info)
  *			char* operand
- *			long code_image_ptr[][80]
+ *			long code_image_ptr[][82]
  *			long* IC - image counter
  *
  */
-addressing_type parse_operand_addressing_type(long* L, line_details line, char* operand, long code_image_ptr[][80], long* IC);
+addressing_type parse_operand_addressing_type(long* L, line_details line, char* operand, long code_image_ptr[][MAX_LINE_LENGTH], long* IC);
 
 int operands_check(line_details line, long* code_image_ptr, long* IC);
 
@@ -74,7 +75,7 @@ int operands_check(line_details line, long* code_image_ptr, long* IC);
  *			long* IC - image counter
  *
  */
-void validate_operand_addressing(char** oper, long* L_ptr, line_details line, addressing_type* src_address, addressing_type* dst_address, char** src_oper, char** dst_oper, long code_image_ptr[][80], long* IC);
+void validate_operand_addressing(char** oper, long* L_ptr, line_details line, addressing_type* src_address, addressing_type* dst_address, char** src_oper, char** dst_oper, long code_image_ptr[][MAX_LINE_LENGTH], long* IC);
 
 
 

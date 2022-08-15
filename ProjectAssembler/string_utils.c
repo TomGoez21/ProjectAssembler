@@ -33,7 +33,7 @@ char* getEndOfWord(char* line) {
 
 char* getFirstWordFromALine(char* line , char* currWord)
 {
-    static char word[80] = {0};
+    static char word[LINE_LENGTH] = {0};
     word[0] = '\0';
     strcpy(word, line);
     strcpy (currWord  , removeLeadingWhiteSpaces(word));
@@ -51,7 +51,7 @@ char* removeEndWhiteSpaces(char* line) {
 }
 
 int isCommnetLine(char* line) {
-    char static wordBuffer[80] = "";
+    char static wordBuffer[LINE_LENGTH] = "";
     char* firstWord = NULL;
     firstWord = getFirstWordFromALine(line , wordBuffer);
     if (firstWord[0] == ';') {
@@ -92,13 +92,13 @@ char* getLeadingWhiteSpace(char* line) {
 
 char* concatWhiteSpacesPerEachLine(char* str, char* whiteSpace) 
 {
-    char static whitSpaceLine[80] = "";
+    char static whitSpaceLine[LINE_LENGTH] = "";
     int i ,j;
     int lines;
     char* buffer;
     j = 0;
     lines = countLines(str);
-    buffer = (char*)malloc(sizeof(char) * lines * 81);
+    buffer = (char*)malloc(sizeof(char) * lines * LINE_LENGTH);
     strcpy(buffer,"");
     strcpy(whitSpaceLine, whiteSpace);
     lines--;

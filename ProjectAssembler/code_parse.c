@@ -22,7 +22,7 @@ char* third_order_group[2] = { "rts","hlt" };
 
 
 /*determine the type of addressing. also add to the word counter L*/
-addressing_type parse_operand_addressing_type(long* L, line_details line, char* operand, long code_image_ptr[][80], long* IC) {
+addressing_type parse_operand_addressing_type(long* L, line_details line, char* operand, long code_image_ptr[][MAX_LINE_LENGTH], long* IC) {
 	int i;
 	char label_name[30] = { 0 };
 	char* operand_after_label = 0;
@@ -88,7 +88,7 @@ addressing_type parse_operand_addressing_type(long* L, line_details line, char* 
 
 
 
-void validate_operand_addressing(char** oper, long* L_ptr, line_details line, addressing_type* src_address, addressing_type* dst_address, char** src_oper, char** dst_oper, long code_image_ptr[][80], long* IC) {
+void validate_operand_addressing(char** oper, long* L_ptr, line_details line, addressing_type* src_address, addressing_type* dst_address, char** src_oper, char** dst_oper, long code_image_ptr[][MAX_LINE_LENGTH], long* IC) {
 	int i = 0;
 	int cmp;
 
@@ -217,7 +217,7 @@ void src_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, a
 	int bin_num;
 	memset(&ten_bit_code, 0, sizeof(ten_bit_code));
 	bin_num = 0;
-	neg_char = calloc(80, sizeof(char));
+	neg_char = calloc(MAX_LINE_LENGTH, sizeof(char));
 	neg_char[0] = '-';
 	if (src_add == IMMEDIATE_ADD) {
 		if (*(src_oper + 1) == '-') {
@@ -305,7 +305,7 @@ void dst_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, a
 	char* neg_char;
 	memset(&ten_bit_code, 0, sizeof(ten_bit_code));
 	bin_num = 0;
-	neg_char = calloc(80, sizeof(char));
+	neg_char = calloc(MAX_LINE_LENGTH, sizeof(char));
 	neg_char[0] = '-';
 	if (dst_add == IMMEDIATE_ADD) {
 		if (*(dst_oper + 1) == '-') {

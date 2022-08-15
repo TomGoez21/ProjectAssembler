@@ -2,11 +2,12 @@
 #define MACRO_H_
 #define MACRO "macro"
 #define END_MACRO "endmacro"
+#define MAX_LINE_LENGTH 82
 #define FALSE 0
 #define TRUE 1
 
 typedef struct macro_struct {
-    char key[80];
+    char key[MAX_LINE_LENGTH];
     char* val;
 }macro;
 

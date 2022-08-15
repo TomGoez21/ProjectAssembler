@@ -2,7 +2,7 @@
 #ifndef STRING_UTIlS_H_
 #define STRING_UTIlS_H_
 #include "utils.h"
-#define LINE_LENGTH	80
+#define LINE_LENGTH	82
 
 /*
  * Function:  removeLeadingWhiteSpaces

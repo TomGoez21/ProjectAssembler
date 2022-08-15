@@ -2,6 +2,7 @@
 
 #ifndef DIRECTIVES_HANDLER_H_
 #define DIRECTIVES_HANDLER_H_
+#define MAX_LINE_LENGTH 82
 #include "utils.h"
 
 typedef enum directive {

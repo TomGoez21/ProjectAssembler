@@ -176,8 +176,8 @@ bool is_directive(char* line) {
 	if (*line++ == '.') {
 		char* copied_directive;
 		char *delim = " ";
-		/*char* copied_line = (char*)malloc(80);*/
-		char copied_line[80];
+		/*char* copied_line = (char*)malloc(82);*/
+		char copied_line[MAX_LINE_LENGTH];
 		strcpy(copied_line, line);
 		copied_directive = strtok(copied_line, delim);
 		if (copied_directive) {
