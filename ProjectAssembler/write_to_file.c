@@ -23,7 +23,7 @@ void write_code_table_to_file(CodeTable* code_table, char* filename) {
 	/*checks if openning file succedded*/
 	if (new_file == NULL) {
 		fprintf(stderr, "Can't write to  %s", filename);
-		return;
+		set_error(true);
 	}
 	/* if code table is empty, quit */
 	if (code_table == NULL) {
@@ -47,7 +47,7 @@ void write_to_extern_file(char* label, int* address, char* ext_filename) {
 	/*checks if openning file succedded*/
 	if (new_file == NULL) {
 		fprintf(stderr, "Can't write to  %s", ext_filename);
-		return;
+		set_error(true);
 	}
 
 	/*write extern label to file*/
@@ -75,7 +75,7 @@ void write_to_entry_file(SymbolTable* symboltable, char* filename) {
 	/*checks if openning file succedded*/
 	if (new_file == NULL) {
 		fprintf(stderr, "Can't write to  %s", entry_filename);
-		return;
+		set_error(true);
 	}
 	/* if code table is empty, quit */
 	if (symboltable == NULL) {

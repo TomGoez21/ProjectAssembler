@@ -8,12 +8,15 @@
 #define NUM_REGERSITERS 8
 #define INITIAL_ALLOCATED_SIZE 10
 
+
 typedef struct line_details {
 	int line_number;
 	char* file_name;
 	char* line;
 } line_details;
 
+/*if an errror was raised, change error to true, in order not to create files*/
+bool set_error(bool current);
 
 /*
  * Function:  cat_str

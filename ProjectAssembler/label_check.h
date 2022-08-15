@@ -71,6 +71,7 @@ bool is_label_valid(line_details line, char* text);
  *
  * Returns: 1 if valid struct
  */
+bool is_label_valid(line_details line, char* text, SymbolTable* symboltable, bool is_second_run);
 bool is_label_valid_in_struct(line_details line, char* text);
 
 

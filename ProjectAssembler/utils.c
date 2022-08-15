@@ -9,6 +9,12 @@
 #define _CRT_SECURE_NO_WARNINGS
 #define ERROR_FILE stderr
 
+bool set_error(bool current) {
+	static bool error = false;
+	error |= current;
+	return error;
+}
+
 /*Writes an error to the stderr*/
 int printf_line_error(line_details line, char* error_message, ...) {
 	int result;
@@ -73,7 +79,8 @@ char* get_first_word(char* str) {
 	allocated = INITIAL_ALLOCATED_SIZE; /* Number of allocated bytes */
 	word = (char*)malloc(allocated); /* Initial allocation */
 	if (!word) { /* Checks for successful allocation */
-		fprintf(stderr, "could not allocate memory for the coming word");
+		fprintf(stderr, "could not allocate memory for the first word in %s", str);
+		set_error(true);
 	}
 	/* Read until whitespace, comma or EOF, copy contents into `word` */
 	while (*str && !isspace(*str) && *str != ',') {
@@ -81,7 +88,8 @@ char* get_first_word(char* str) {
 		if (w_len >= allocated - 1) {
 			word = realloc(word, allocated *= 2);
 			if (!word) { /* Checks for successful allocation */
-				fprintf(stderr, "could not reallocate memory for the coming word");
+				fprintf(stderr, "could not reallocate memory for the first word in %s", str);
+				set_error(true);
 			}
 		}
 		word[w_len++] = *str++;

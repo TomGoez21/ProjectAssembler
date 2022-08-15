@@ -34,6 +34,7 @@ directive find_directive_type(line_details line, char* begin, char *directive_st
 	while (isspace(*begin)) { begin++; }
 	if (*begin++ != '.') {
 		printf_line_error(line, "directive should start with period");
+		set_error(true);
 		return _invalid;
 	}
 
@@ -43,6 +44,7 @@ directive find_directive_type(line_details line, char* begin, char *directive_st
 	d = str_to_directive(directive_string);
 	if (d == _invalid) {
 		printf_line_error(line, "invalid directive %s", directive_string);
+		set_error(true);
 	}
 	return d;
 
@@ -56,12 +58,14 @@ void string_handler(line_details line, char* begin, long *DC, long** data_image_
 	/* Checks if the string argument has leading quotation marks */
 	if (*begin++ != '"') {
 		printf_line_error(line, "String directive should start with quotation marks");
+		set_error(true);
 		return;
 	}
 	last_quot = strrchr(begin, '"');
 
 	if (!last_quot) {
-		printf_line_error(line, "String should end quotation marks");
+		printf_line_error(line, "String %s should end with quotation marks", begin);
+		set_error(true);
 		return;
 	}
 
@@ -82,7 +86,8 @@ void string_handler(line_details line, char* begin, long *DC, long** data_image_
 	while (isspace(*begin)) { begin++; }
 	/* checks for extra chracters after string directive */
 	if (*begin) {
-		printf_line_error(line, "Extra characters after end of directive");
+		printf_line_error(line, "Extra characters after end of string directive: %s", begin);
+		set_error(true);
 	}
 
 }
@@ -96,6 +101,7 @@ void data_handler(line_details line, char* begin, long *DC, long** data_image_pt
 	/* Get first argument from the string input */
 	if (sscanf(begin, "%d%n", &num, &ilen) <= 0) {
 		printf_line_error(line, "expected number after .data");
+		set_error(true);
 		return;
 	}
 	begin += ilen;
@@ -103,6 +109,7 @@ void data_handler(line_details line, char* begin, long *DC, long** data_image_pt
 
 	if (*begin != ',' && *begin) {
 		printf_line_error(line, "not an integer");
+		set_error(true);
 		return;
 	}
 	/* Insert the data into data_image */
@@ -116,8 +123,9 @@ void data_handler(line_details line, char* begin, long *DC, long** data_image_pt
 		while (isspace(*begin)) { begin++; }
 
 		/* get argument */
-		if (!sscanf(begin, "%d%n", &num, &ilen)) {
+		if (sscanf(begin, "%d%n", &num, &ilen) <= 0) {
 			printf_line_error(line, "Expected a number after comma");
+			set_error(true);
 			return;
 		}
 
@@ -126,7 +134,8 @@ void data_handler(line_details line, char* begin, long *DC, long** data_image_pt
 		while (isspace(*begin)) { begin++; }
 
 		if (*begin != ',' && *begin != 0) {
-			printf_line_error(line, "not an integer");
+			printf_line_error(line, "not an integer in data content");
+			set_error(true);
 			return;
 		}
 
@@ -147,13 +156,15 @@ void struct_handler(line_details line, char* begin, long *DC, long** data_image_
 	/* Get first argument from the string input */
 	if (sscanf(begin, "%d%n", &num, &ilen) <= 0) {
 		printf_line_error(line, "expected number after .struct");
+		set_error(true);
 		return;
 	}
 	begin += ilen;
 
 	while (isspace(*begin)) { begin++; }
 	if (*begin != ',') {
-		printf_line_error(line, "not an integer");
+		printf_line_error(line, "not an integer in struct directive");
+		set_error(true);
 		return;
 	}
 	/* Insert the data into data_image*/
@@ -187,6 +198,8 @@ bool is_directive(char* line) {
 			}
 			else {
 				is_directive = false;
+				fprintf(stderr, "\"%s\" is invalid directive name", copied_directive);
+				set_error(true);
 				return is_directive;
 			}
 		}

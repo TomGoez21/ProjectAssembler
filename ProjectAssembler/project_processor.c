@@ -44,14 +44,13 @@ void line_handler_sec_pass(
 bool process_file(char* filename, SymbolTable* symboltable, CodeTable* codetable) {
 	long IC = 100;
 	long DC = 0;
-	int i = 100;
 	/*long* data_image = (long*)calloc(1, sizeof(long));*/
-	/*long* code_image = (long*)calloc(1, sizeof(long));*/
+	//long* code_image = (long*)calloc(1, sizeof(long));
 	long* data_image[MAX_DATA_IMAGE_LENGTH] = { 0 };
 	long code_image[MAX_CODE_IMAGE_LENGTH][MAX_LINE_LENGTH] = { 0 };
 	unsigned int line_count = 0;
 	FILE* file_dst; /* Current assembly file descriptor to process */
-	
+
 	/*creat file path for externals file. change to .ext extension in filename*/
 	char* extern_filename = calloc(strlen(filename) + 2, sizeof(char));
 	strcpy(extern_filename, filename);
@@ -60,12 +59,13 @@ bool process_file(char* filename, SymbolTable* symboltable, CodeTable* codetable
 	extern_filename[strlen(filename)] = 't';
 	extern_filename[strlen(filename) + 1] = '\0';
 
-	/* Open file. Skip if fails */
+	/* Open .am file. Skip if fails */
 	file_dst = fopen(filename, "r");
 	if (file_dst == NULL) {
 		/* if file couldn't be opened, write to stderr. */
 		fprintf(stderr, "Error: Can't access to \"%s.as\" . skipping it.\n", filename);
 		free(filename); /* The only allocated space is for the full file name */
+		set_error(true);
 		return false;
 	}
 
@@ -74,35 +74,30 @@ bool process_file(char* filename, SymbolTable* symboltable, CodeTable* codetable
 		if (isEmetyLine(line) || isCommnetLine(line)) {
 			continue;
 		}
-
-		line_handler(symboltable, line_count, line, filename, &DC, &IC, data_image, code_image, extern_filename);
-	}
-	i = 100;
-	for (; i < IC; i++) {
-		/*printf("code image: %s\n", code_image[i]);*/
-	}
-	i = 0;
-	for (; i < DC; i++) {
-		/*printf("data_image: %d\n", data_image[i]);*/
+		line_count++;
+		line_handler(symboltable, line_count, line, filename, &DC, &IC, data_image, code_image, &extern_filename);
 	}
 
 
+	/*second pass on all lines in order to detemine the value of each word. second pass happens only if there were no errors.*/
+	if (!(set_error(false))) {
+		rewind(file_dst);
+		line_count = 0;
+		IC = 100;
+		DC = 0;
 
-	/*second pass on all lines in order to detemine the value of each word*/
-	rewind(file_dst);
-	line_count = 0;
-	IC = 100;
-	DC = 0;
+		while (fgets(line, MAX_LINE_LENGTH, file_dst)) {
+			line_count++;
+			line_handler_sec_pass(symboltable, codetable, line_count, line, filename, &DC, &IC, data_image, code_image, extern_filename);
+		}
+		data_image_to_code_table(data_image, codetable, &IC, &DC);
 
-	while (fgets(line, MAX_LINE_LENGTH, file_dst)) {
-		line_handler_sec_pass(symboltable, codetable, line_count, line, filename, &DC, &IC, data_image, code_image, extern_filename);
+		/*creates .ob and .ext files*/
+		write_code_table_to_file(codetable, filename);
+		write_to_entry_file(symboltable, filename);
 	}
-	data_image_to_code_table(data_image, codetable, &IC, &DC);
 
-	/*creates the .ob file*/
-	write_code_table_to_file(codetable, filename);
-	write_to_entry_file(symboltable, filename);
-	return 1;
+
 }
 
 void line_handler(
@@ -119,21 +114,19 @@ void line_handler(
 	/*L is number of code words in a line*/
 	long L = 0;
 	char* oper = 0;
-	char* label;
 	line_details ld;
 	addressing_type src_address = NONE;
 	addressing_type dst_address = NONE;
 	char* src_oper = NULL;
 	char* dst_oper = NULL;
-	char* label_after_directive = { 0 };
 	SymbolTableEntry* line_to_table = malloc(sizeof(SymbolTableEntry));
 	ld.line_number = line_count;
 	ld.file_name = file_name;
 	ld.line = line;
 
 	/*gets a label. returns null if no label found*/
-	label = '\0';
-	label = get_label(ld);
+	char* label = { 0 };
+	label = get_label(ld, symboltable, false);
 
 	/*checks wherther it is .extern or .entry directive in the beginning of the line*/
 	if (is_directive(ld.line)) {
@@ -142,13 +135,16 @@ void line_handler(
 		directive directive_type = find_directive_type(ld, ld.line, dir_beginning);
 		/*continue to the next word after directive*/
 		ld.line = ld.line + strlen(dir_beginning) + 1;
+		char* label_after_directive = { 0 };
 		label_after_directive = get_first_word(ld.line);
 		if (!is_label_valid_in_text(ld, label_after_directive)) {
 			printf_line_error(ld, "label, %s ,is ilegal", label_after_directive);
+			set_error(true);
 		}
 
 		if (directive_type == _string || directive_type == _data || directive_type == _struct) {
 			printf_line_error(ld, "%s supposed to come after label", directive_type);
+			set_error(true);
 		}
 		if (directive_type == _extern) {
 			line_to_table->counter = 0;
@@ -189,6 +185,7 @@ void line_handler(
 			}
 			if (directive_type == _extern) {
 				printf_line_error(ld, "ignoring labels in the beginning of .extern line");
+				set_error(true);
 
 				line_to_table->counter = 0;
 				line_to_table->symbol_name = label;
@@ -199,7 +196,7 @@ void line_handler(
 			/*dealing with entry in the second pass*/
 			if (directive_type == _entry) {
 				printf_line_error(ld, "ignoring labels in the beginning of .entry line");
-				free(label);
+				set_error(true);
 			}
 
 			ld.line = ld.line + strlen(dir) + 1;
@@ -221,7 +218,8 @@ void line_handler(
 			line_to_table->type = _CODE;
 			/*add symbol to symboltable*/
 			add_to_table(symboltable, *line_to_table);
-		};
+		}
+
 		/*check if word is order from the order_list. If so, analyze the operands*/
 		if (is_order(ld)) {
 			/* check the structre of the order. return number of words this code is translated to*/
@@ -250,7 +248,6 @@ void line_handler_sec_pass(
 	/*L is number of code words in a line*/
 	long L = 0;
 	char* oper = 0;
-	char* label;
 	line_details ld;
 	addressing_type src_address = NONE;
 	addressing_type dst_address = NONE;
@@ -262,8 +259,8 @@ void line_handler_sec_pass(
 	ld.line = line;
 
 	/*gets a label. returns null if no label found*/
-	label = '\0';
-	label = get_label(ld);
+	char* label = { 0 };
+	label = get_label(ld, symboltable, true);
 
 	/*continue to the next word*/
 	if (*label) {
@@ -283,6 +280,7 @@ void line_handler_sec_pass(
 		if (*label) {
 			if (directive_type == _entry) {
 				printf_line_error(ld, "ignoring labels in the beginning of .entry line");
+				set_error(true);
 			}
 
 			ld.line = ld.line + strlen(dir) + 1;
@@ -315,7 +313,6 @@ void line_handler_sec_pass(
 	}
 
 }
-
 
 
 char* preAssemblerProccess(char* filename)
@@ -369,7 +366,7 @@ char* preAssemblerProccess(char* filename)
 			if (foundedMacro != NULL)
 			{
 				strcpy(leadingWhiteSpace, getLeadingWhiteSpace(line));
-				newFile = (char*)realloc(newFile, (strlen(newFile) + countLines(foundedMacro->val)) * 81 + 1);
+				newFile = (char*)realloc(newFile, (strlen(newFile) + countLines(foundedMacro->val)) * MAX_LINE_LENGTH + 1);
 				concatWhiteSpaces = concatWhiteSpacesPerEachLine(foundedMacro->val, leadingWhiteSpace);
 				strcat(newFile, concatWhiteSpaces);
 			}
@@ -387,7 +384,7 @@ char* preAssemblerProccess(char* filename)
 			}
 			else
 			{
-				newFile = (char*)realloc(newFile, (strlen(newFile) + 81));
+				newFile = (char*)realloc(newFile, (strlen(newFile) + MAX_LINE_LENGTH));
 				if (newFile == NULL) {
 					fprintf(stderr, "Failed to alocate");
 				}

@@ -1,6 +1,6 @@
 #ifndef SYMBOL_TABLE_H_
 #define SYMBOL_TABLE_H_
-
+#include <stdbool.h>
 
 typedef enum label_type {
 	_DATA, _CODE, _EXTERN, _ENTRY, _NO_TYPE
@@ -23,5 +23,7 @@ void add_to_table(SymbolTable* table, SymbolTableEntry to_add);
 SymbolTableEntry* find_label_from_table(SymbolTable* table, char* label);
 
 void freeSymbolTable(SymbolTable* table);
+
+bool label_exists(SymbolTable* table, char* symbol_name);
 
 #endif

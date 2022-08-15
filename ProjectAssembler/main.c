@@ -10,7 +10,6 @@ int main(int argc, char* argv[]) {
 	int i;
 	SymbolTable symboltable;
 	CodeTable codetable;
-
 	/* To break line if needed */
 	bool succeeded = true;
 	/* Process each file by arguments */
