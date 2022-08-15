@@ -155,7 +155,7 @@ void line_handler(
 
 	/*gets a label. returns null if no label found*/
 	char* label = { 0 };
-	label = get_label(ld, symboltable);
+	label = get_label(ld, symboltable, false);
 
 	/*checks wherther it is .extern or .entry directive in the beginning of the line*/
 	if (is_directive(ld.line)) {
@@ -289,7 +289,7 @@ void line_handler_sec_pass(
 
 	/*gets a label. returns null if no label found*/
 	char* label = { 0 };
-	label = get_label(ld, symboltable);
+	label = get_label(ld, symboltable, true);
 
 	/*continue to the next word*/
 	if (*label) {

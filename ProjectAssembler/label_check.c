@@ -100,7 +100,7 @@ bool is_reserved_word(line_details line, char* text) {
 	return false;
 }
 
-bool is_label_valid(line_details line, char* text, SymbolTable* symboltable) {
+bool is_label_valid(line_details line, char* text, SymbolTable* symboltable, bool is_second_run) {
 	/* Check if the first char is alpha, length less than 30, all the others are alphanumeric, and that the label doesnt already exsits*/
 	bool is_valid_label = true;
 	bool is_alphnumeric = true;
@@ -121,8 +121,9 @@ bool is_label_valid(line_details line, char* text, SymbolTable* symboltable) {
 	is_valid_label &= strlen(text - 1) <= MAX_LABEL_LENGTH;
 	is_valid_label &= (isalpha(text[0]) > 0);
 	/*check if label is already in symboltable, thus not valid*/
-	if (label_exists(symboltable, label)) {
+	if (label_exists(symboltable, label) && !is_second_run) {
 		printf_line_error(line, "label %s already exists", label);
+		set_error(true);
 		is_valid_label &= !label_exists(symboltable, label);
 	}
 	is_valid_label &= !is_reserved_word(line, label);
@@ -183,7 +184,7 @@ char* get_label_in_struct(char* text, char* label_name) {
 }
 
 
-char* get_label(line_details line, SymbolTable* symboltable) {
+char* get_label(line_details line, SymbolTable* symboltable, bool is_second_run) {
 	int i = 0;
 	char *label = calloc(30, sizeof(char));
 	if (!label) {
@@ -193,7 +194,7 @@ char* get_label(line_details line, SymbolTable* symboltable) {
 
 	bool is_label = true;
 	while (isspace(*(line.line))) { (line.line)++; }
-	is_label = is_label_valid(line, line.line, symboltable);
+	is_label = is_label_valid(line, line.line, symboltable, is_second_run);
 	if (is_label) {
 		for (i; line.line[i] != ':'; i++) {
 			label[i] = line.line[i];
