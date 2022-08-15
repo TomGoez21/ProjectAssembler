@@ -9,12 +9,10 @@ macro* createNewMacro(char* key, char* val) {
     macro* new;
     char* tempVal;
     new = (macro*)malloc(sizeof(macro));
-#pragma warning(suppress : 4996)
     strcpy(new->key, key);
     tempVal = new->val;
-    tempVal =(char*) malloc(strlen(val)+81);
+    tempVal =(char*) malloc(strlen(val)+MAX_LINE_LENGTH);
     tempVal[0] = '\0';
-#pragma warning(suppress : 4996)
     strcpy(tempVal,val);
     new->val = tempVal;
     return (new);
@@ -64,13 +62,11 @@ int checkIfMacroInList(char* word, macroList** list) {
 }
 void PrintList(macroList** list) {
     macroList* temp;
-    macro* curr;
     temp = *list;
     if (Sempty(temp))
         printf("\nThe stack is empty!");
     else {
         while (temp->size > 0) {
-            curr = temp->data;
             temp = temp->next;
         }
     }
@@ -111,11 +107,12 @@ int isMacroLabel(char* word) {
 }
 
 void freeMacroList(macroList* head) {
-    if (head == NULL) return;
-    int size = head->size;
+    int size;
     macroList* tmp;
     macro* macroTmp;
     char* charTmp;
+    size = head->size;
+    if (head == NULL) return;
     for(;size>0 ; size--){
         tmp = head;
         head = head->next;

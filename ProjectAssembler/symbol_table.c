@@ -53,4 +53,17 @@ SymbolTableEntry* find_label_from_table(SymbolTable* table, char* label) {
 	fprintf(stderr, "Label %s does not exist in code\n", label);
 	set_error(true);
 	return NULL;
+	return NULL;
+}
+
+void freeSymbolTable(SymbolTable* table) {
+	int i;
+	SymbolTableEntry*  tmp = NULL;
+	char* chTmp = NULL;
+	for (i = 0; i < table->size; ++i) {
+		tmp = &(table->entries[i]);
+		chTmp = tmp->symbol_name;
+		free(chTmp);
+	}
+	free(table->entries);
 }

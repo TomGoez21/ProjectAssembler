@@ -4,10 +4,9 @@
 #include <string.h>
 #include <stdarg.h>
 #include "utils.h"
-
+#pragma warning(disable : 4996).
 
 #define _CRT_SECURE_NO_WARNINGS
-#pragma warning(disable : 4996)
 #define ERROR_FILE stderr
 
 bool set_error(bool current) {
@@ -21,7 +20,7 @@ int printf_line_error(line_details line, char* error_message, ...) {
 	int result;
 	va_list ap;
 	/*prints to ERROR_FILE the relevant line number, file name.*/
-	fprintf(ERROR_FILE, "\nError in %s line %ld: \n", line.file_name, line.line_number);
+	fprintf(ERROR_FILE, "\nError in %s line %d: \n", line.file_name, line.line_number);
 	/*prints the wanted error*/
 	va_start(ap, error_message);
 	result = vfprintf(ERROR_FILE, error_message, ap);
@@ -32,7 +31,7 @@ int printf_line_error(line_details line, char* error_message, ...) {
 
 
 char* cat_str(char* str0, char* str1) {
-	char* str = (char*)check_malloc(strlen(str0) + strlen(str1) + 1); //TODO: free memory
+	char* str = (char*)check_malloc(strlen(str0) + strlen(str1) + 1);
 	strcpy(str, str0);
 	strcat(str, str1);
 	return str;
@@ -48,9 +47,6 @@ void* check_malloc(long size) {
 	return ptr;
 }
 
-bool is_label(char* str) {
-	
-}
 
 int move_white_space(int index, char* string) {
 	for (; (string[(index)] == '\t' || string[(index)] == ' ') && (string[(index)]); (++(index)));
@@ -64,7 +60,7 @@ bool is_legal_num(char* text) {
 	if (text[0] == '-' || text[0] == '+') {
 		text++;
 	}
-	for (i; i <= (int)(strlen(text)); i++) {
+	for(; i <= (int)(strlen(text)); i++){
 		if (isdigit(text[i])) {
 			return true;
 		}
@@ -75,11 +71,13 @@ bool is_legal_num(char* text) {
 
 /* Reads the first word of str, allocates memory for it and returns a copy of it */
 char* get_first_word(char* str) {
+	int allocated;
+	int w_len;
+	char* word; /* Points to the beginning of the copy of the word */
 	while (isspace(*(str))) { ((str))++; }
-	//char* word = { 0 }; /* Points to the beginning of the copy of the word */
-	int w_len = 0; /* The word's length */
-	int allocated = INITIAL_ALLOCATED_SIZE; /* Number of allocated bytes */
-	char *word = calloc(allocated, sizeof(char)); /* Initial allocation */
+	w_len = 0; /* The word's length */
+	allocated = INITIAL_ALLOCATED_SIZE; /* Number of allocated bytes */
+	word = (char*)malloc(allocated); /* Initial allocation */
 	if (!word) { /* Checks for successful allocation */
 		fprintf(stderr, "could not allocate memory for the first word in %s", str);
 		set_error(true);

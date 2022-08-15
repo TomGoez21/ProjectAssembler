@@ -1,3 +1,4 @@
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -21,7 +22,7 @@ char* third_order_group[2] = { "rts","hlt" };
 
 
 /*determine the type of addressing. also add to the word counter L*/
-addressing_type parse_operand_addressing_type(long* L, line_details line, char* operand, long code_image_ptr[][80], long* IC) {
+addressing_type parse_operand_addressing_type(long* L, line_details line, char* operand, long code_image_ptr[][MAX_LINE_LENGTH], long* IC) {
 	int i;
 	char label_name[30] = { 0 };
 	char* operand_after_label = 0;
@@ -87,7 +88,7 @@ addressing_type parse_operand_addressing_type(long* L, line_details line, char* 
 
 
 
-void validate_operand_addressing(char** oper, long* L_ptr, line_details line, addressing_type* src_address, addressing_type* dst_address, char** src_oper, char** dst_oper, long code_image_ptr[][80], long* IC) {
+void validate_operand_addressing(char** oper, long* L_ptr, line_details line, addressing_type* src_address, addressing_type* dst_address, char** src_oper, char** dst_oper, long code_image_ptr[][MAX_LINE_LENGTH], long* IC) {
 	int i = 0;
 	int cmp;
 
@@ -97,7 +98,7 @@ void validate_operand_addressing(char** oper, long* L_ptr, line_details line, ad
 	*L_ptr += 1;
 
 	/*add operand to code_image*/
-	//*code_image_ptr = (long*)realloc(*code_image_ptr, (*IC + 1) * sizeof(long));
+	/*code_image_ptr = (long*)realloc(*code_image_ptr, (*IC + 1) * sizeof(long));*/
 	strcpy(code_image_ptr[*IC], *oper);
 	(*IC)++;
 
@@ -213,13 +214,15 @@ void opcode_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add
 
 void src_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, addressing_type dst_add, char* src_oper, char* dst_oper, CodeTable* codetable, CodeTableEntry* code_table_line, SymbolTable* symboltable, char* extern_filename) {
 	code_structure ten_bit_code;
+	char* neg_char;
+	int bin_num;
 	memset(&ten_bit_code, 0, sizeof(ten_bit_code));
-	int bin_num = 0;
-	char* neg_char = calloc(80, sizeof(char));
+	bin_num = 0;
+	neg_char = calloc(MAX_LINE_LENGTH, sizeof(char));
 	neg_char[0] = '-';
 	if (src_add == IMMEDIATE_ADD) {
 		if (*(src_oper + 1) == '-') {
-			ten_bit_code.address = atoi(strcat( neg_char, src_oper + 2));
+			ten_bit_code.address = atoi(strcat(neg_char, src_oper + 2));
 		}
 		else {
 			ten_bit_code.address = atoi(src_oper + 1);
@@ -256,7 +259,7 @@ void src_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, a
 		}
 		label_name[i] = '\0';
 		symbol_line = find_label_from_table(symboltable, label_name);
-		
+
 		ten_bit_code.address = symbol_line->counter;
 		ten_bit_code.ARE = 2;
 		bin_num = ten_bit_code.address << 2
@@ -299,9 +302,11 @@ void src_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, a
 
 void dst_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, addressing_type dst_add, char* src_oper, char* dst_oper, CodeTable* codetable, CodeTableEntry* code_table_line, SymbolTable* symboltable, char* extern_filename) {
 	code_structure ten_bit_code;
+	int bin_num;
+	char* neg_char;
 	memset(&ten_bit_code, 0, sizeof(ten_bit_code));
-	int bin_num = 0;
-	char* neg_char = calloc(80, sizeof(char));
+	bin_num = 0;
+	neg_char = calloc(MAX_LINE_LENGTH, sizeof(char));
 	neg_char[0] = '-';
 	if (dst_add == IMMEDIATE_ADD) {
 		if (*(dst_oper + 1) == '-') {
@@ -386,7 +391,7 @@ void dst_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, a
 
 		bin_num = ten_bit_code.address << 2
 			| ten_bit_code.ARE;
-		
+
 		code_table_line->code = decimalToBin(bin_num);
 		code_table_line->address = (*IC - 1);
 		add_to_code_table(codetable, *code_table_line);
@@ -402,8 +407,9 @@ void dst_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, a
 
 void src_dst_reg_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, addressing_type dst_add, char* src_oper, char* dst_oper, CodeTable* codetable, CodeTableEntry* code_table_line, SymbolTable* symboltable) {
 	code_structure ten_bit_code;
+	int bin_num;
 	memset(&ten_bit_code, 0, sizeof(ten_bit_code));
-	int bin_num = 0;
+	bin_num = 0;
 	ten_bit_code.src_reg_add = src_oper[1];
 	ten_bit_code.dst_reg_add = dst_oper[1];
 	ten_bit_code.ARE = 0;
@@ -417,7 +423,7 @@ void src_dst_reg_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type sr
 }
 
 /*adds all data_image to the code table with address and binary conversion*/
-void data_image_to_code_table(long **data_image_ptr, CodeTable* codetable, long* IC, long *DC) {
+void data_image_to_code_table(long** data_image_ptr, CodeTable* codetable, long* IC, long* DC) {
 	int i = 0;
 	CodeTableEntry* code_table_line = malloc(sizeof(CodeTableEntry));
 	for (; i < *DC; i++) {
@@ -426,4 +432,16 @@ void data_image_to_code_table(long **data_image_ptr, CodeTable* codetable, long*
 		add_to_code_table(codetable, *code_table_line);
 		(*IC)++;
 	}
+}
+
+void freeCodeTable(CodeTable* table) {
+	int i;
+	CodeTableEntry* tmp = NULL;
+	char* chTmp = NULL;
+	for (i = 0; i < table->size; ++i) {
+		tmp = &(table->entries[i]);
+		chTmp = tmp->code;
+		free(chTmp);
+	}
+	free(table->entries);
 }
