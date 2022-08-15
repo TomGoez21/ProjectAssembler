@@ -177,8 +177,9 @@ void add_to_code_table(CodeTable* table, CodeTableEntry to_add) {
 		table->entries = (CodeTableEntry*)realloc(table->entries, table->size * sizeof(CodeTableEntry));
 	}
 	if (!table->entries) {
-		fprintf(stderr, "Memory allocation failed.");
-		exit(1);
+		fprintf(stderr, "Memory allocation failed for table entry.");
+		set_error(true);
+
 	}
 	/* (Shallow) copy the new entry to the table*/
 	memcpy(&(table->entries[table->size - 1]), &to_add, sizeof(CodeTableEntry));
@@ -368,6 +369,11 @@ void dst_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, a
 
 	if (dst_add == DIRECT_ADD) {
 		SymbolTableEntry* symbol_line = find_label_from_table(symboltable, dst_oper);
+
+		if (!symbol_line) {
+			return;
+		}
+
 		if (symbol_line->type == 0 || symbol_line->type == 1) {
 			ten_bit_code.address = symbol_line->counter;
 			ten_bit_code.ARE = 2;
@@ -387,7 +393,7 @@ void dst_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, a
 
 		/*writes to the external file*/
 		if (symbol_line->type == 2) {
-			write_to_extern_file(symbol_line->symbol_name, &code_table_line->address, extern_filename);
+			write_to_extern_file(symbol_line->symbol_name, &code_table_line->address, extern_filename);		
 		}
 		return;
 	}
