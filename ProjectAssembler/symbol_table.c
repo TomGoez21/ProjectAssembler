@@ -5,7 +5,7 @@
 #include "utils.h"
 
 
-bool label_exists(SymbolTable* table, char *symbol_name) {
+bool label_exists(SymbolTable* table, char* symbol_name) {
 	int i;
 	for (i = 0; i < table->size; ++i) {
 		if (strcmp(table->entries[i].symbol_name, symbol_name) == 0 && table->entries[i].type != _ENTRY) {
@@ -25,7 +25,7 @@ void add_to_table(SymbolTable* table, SymbolTableEntry to_add) {
 
 	table->size++;
 	if (!table->entries) {
-		/*First add :*/ 
+		/*First add :*/
 		table->entries = (SymbolTableEntry*)malloc(table->size * sizeof(SymbolTableEntry)); /* Initial allocation */
 	}
 	else {
@@ -49,21 +49,25 @@ SymbolTableEntry* find_label_from_table(SymbolTable* table, char* label) {
 			return &table->entries[i];
 		}
 	}
-
 	fprintf(stderr, "Label %s does not exist in code\n", label);
 	set_error(true);
-	return NULL;
 	return NULL;
 }
 
 void freeSymbolTable(SymbolTable* table) {
 	int i;
-	SymbolTableEntry*  tmp = NULL;
-	char* chTmp = NULL;
+	SymbolTableEntry* tmp = NULL;
+
 	for (i = 0; i < table->size; ++i) {
 		tmp = &(table->entries[i]);
-		chTmp = tmp->symbol_name;
-		free(chTmp);
+		if (tmp->symbol_name) {
+			free(tmp->symbol_name);
+			tmp->symbol_name = NULL;
+		}
 	}
-	free(table->entries);
+
+	if (table->entries) {
+		free(table->entries);
+		table->entries = NULL;
+	}
 }

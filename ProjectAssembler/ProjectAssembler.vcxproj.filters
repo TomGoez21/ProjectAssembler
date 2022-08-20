@@ -36,9 +36,6 @@
     <ClCompile Include="code_parse.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="orders.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="macro.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -47,6 +44,12 @@
     </ClCompile>
     <ClCompile Include="write_to_file.c">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="project_processor.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="project_processor.h">
+      <Filter>Header Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -66,9 +69,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="code_parse.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="orders.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="string_utils.h">

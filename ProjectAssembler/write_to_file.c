@@ -9,7 +9,7 @@
 #include "symbol_conversion.h"
 #include "write_to_file.h"
 
-#pragma warning(disable : 4996)
+
 
 
 void write_code_table_to_file(CodeTable* code_table, char* filename) {
@@ -90,7 +90,7 @@ void write_to_entry_file(SymbolTable* symboltable, char* filename) {
 				}
 
 				if (strcmp(symboltable->entries[i].symbol_name, symboltable->entries[j].symbol_name) == 0) {
-					fprintf(new_file, "\n%s     %s", symboltable->entries[j].symbol_name , decimalToSymbolsBase(symboltable->entries[j].counter));
+					fprintf(new_file, "%s     %s\n", symboltable->entries[j].symbol_name , decimalToSymbolsBase(symboltable->entries[j].counter));
 				}
 			}
 		}

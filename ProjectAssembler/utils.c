@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include "utils.h"
-#pragma warning(disable : 4996).
+
 
 #define _CRT_SECURE_NO_WARNINGS
 #define ERROR_FILE stderr

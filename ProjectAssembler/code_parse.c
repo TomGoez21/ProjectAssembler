@@ -7,13 +7,12 @@
 #include <ctype.h> 
 #include "utils.h"
 #include "label_check.h"
-#include "orders.h"
 #include "code_parse.h"
 #include "symbol_conversion.h"
 #include "string_utils.h"
 #include "write_to_file.h"
 
-#pragma warning(disable : 4996)
+
 
 
 char* first_order_group[5] = { "mov","cmp","add","sub","lea" };
@@ -41,7 +40,7 @@ addressing_type parse_operand_addressing_type(long* L, line_details line, char* 
 	if (operand[0] == '#' && is_legal_num(operand + 1)) {
 		*L += 1;
 		/*adding the immediate operand to code_image*/
-		strcpy(code_image_ptr[*IC], operand + 1);
+		strcpy((char*)(code_image_ptr[*IC]), operand + 1);
 		(*IC)++;
 		return IMMEDIATE_ADD;
 	}
@@ -50,7 +49,7 @@ addressing_type parse_operand_addressing_type(long* L, line_details line, char* 
 	if (operand[0] == 'r' && operand[1] >= '0' && operand[1] <= '7' && operand[2] == '\0') {
 		*L += 1;
 		/*adding the register operand to code_image*/
-		strcpy(code_image_ptr[*IC], operand);
+		strcpy((char*)(code_image_ptr[*IC]), operand);
 		(*IC)++;
 		return REGISTER_ADD;
 	}
@@ -59,13 +58,12 @@ addressing_type parse_operand_addressing_type(long* L, line_details line, char* 
 	if (is_label_valid_in_struct(line, operand) &&
 		(*(operand_after_label) == '.') && ((*(operand_after_label + 1) == '1') || (*(operand_after_label + 1) == '2'))) {
 		*L += 2;
-
 		/*adding the label of the struct operand to code_image*/
 		if (*label_name) {
-			strncpy(code_image_ptr[*IC], label_name, sizeof(label_name));
+			strncpy((char*)(code_image_ptr[*IC]), label_name, sizeof(code_image_ptr[*IC]));
 			(*IC)++;
 			/*adding the strcut index to code_image*/
-			strcpy(code_image_ptr[*IC], operand_after_label + 1);
+			strcpy((char*)(code_image_ptr[*IC]), operand_after_label + 1);
 			(*IC)++;
 
 		}
@@ -77,7 +75,7 @@ addressing_type parse_operand_addressing_type(long* L, line_details line, char* 
 	if (is_label_valid_in_text(line, operand)) {
 		*L += 1;
 		/*adding the label operand to code_image*/
-		strcpy(code_image_ptr[*IC], operand);
+		strcpy((char*)(code_image_ptr[*IC]), operand);
 		(*IC)++;
 		return DIRECT_ADD;
 	}
@@ -98,8 +96,7 @@ void validate_operand_addressing(char** oper, long* L_ptr, line_details line, ad
 	*L_ptr += 1;
 
 	/*add operand to code_image*/
-	/*code_image_ptr = (long*)realloc(*code_image_ptr, (*IC + 1) * sizeof(long));*/
-	strcpy(code_image_ptr[*IC], *oper);
+	strcpy((char*)(code_image_ptr[*IC]), *oper);
 	(*IC)++;
 
 	line.line += strlen(*oper);
@@ -118,13 +115,21 @@ void validate_operand_addressing(char** oper, long* L_ptr, line_details line, ad
 	/*get the dst_address name*/
 	*dst_oper = get_first_word(line.line);
 
+	/*check if there is third operand - illegal!*/
+	line.line += strlen(*dst_oper);
+	while (isspace(*(line.line))) { ((line.line))++; }
+	if (*line.line) {
+		printf_line_error(line, "too many operators for opcode: %s", *oper);
+		set_error(true);
+	}
+
 
 	/*in case there is only one operand after opcode, it supposed to be a dst operand*/
 	if (!(**dst_oper) && **src_oper) {
 		strcpy(*dst_oper, *src_oper);
-		memset(*src_oper, 0, sizeof(*src_oper));
-
+		memset(*src_oper, 0, strlen(*src_oper));
 	}
+
 	/*check if opcode in the first group of opcodes, which means it gets 2 operands./
 	there are 5 opcode in this group.*/
 	for (i = 0; i < 5; i++) {
@@ -132,7 +137,7 @@ void validate_operand_addressing(char** oper, long* L_ptr, line_details line, ad
 		if (cmp == 0) {
 			*src_address = parse_operand_addressing_type(L_ptr, line, *src_oper, code_image_ptr, IC);
 			*dst_address = parse_operand_addressing_type(L_ptr, line, *dst_oper, code_image_ptr, IC);
-			check_src_dst_per_opcode(oper, *src_address, *dst_address, line);
+			check_src_dst_per_opcode(*oper, *src_address, *dst_address, line);
 
 			return;
 		}
@@ -276,7 +281,7 @@ void src_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, a
 		ten_bit_code.ARE = 0;
 		bin_num = ten_bit_code.address << 2
 			| ten_bit_code.ARE;
-		memset(code_table_line, 0, sizeof(code_table_line));
+		memset(code_table_line, 0, sizeof(*code_table_line));
 		code_table_line->code = decimalToBin(bin_num);
 		code_table_line->address = (*IC - *L_ptr + 2);
 		add_to_code_table(codetable, *code_table_line);
@@ -365,7 +370,7 @@ void dst_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, a
 		ten_bit_code.ARE = 0;
 		bin_num = ten_bit_code.address << 2
 			| ten_bit_code.ARE;
-		memset(code_table_line, 0, sizeof(code_table_line));
+		memset(code_table_line, 0, sizeof(*code_table_line));
 		code_table_line->code = decimalToBin(bin_num);
 		code_table_line->address = (*IC - 1);
 		add_to_code_table(codetable, *code_table_line);
@@ -397,8 +402,10 @@ void dst_to_bin(long* L_ptr, long* IC, char* opernad, addressing_type src_add, a
 		add_to_code_table(codetable, *code_table_line);
 
 		/*writes to the external file*/
-		if (symbol_line->type == 2) {
-			write_to_extern_file(symbol_line->symbol_name, &code_table_line->address, extern_filename);		
+		if (!(set_error(false))) {
+			if (symbol_line->type == 2) {
+				write_to_extern_file(symbol_line->symbol_name, &code_table_line->address, extern_filename);
+			}
 		}
 		return;
 	}
@@ -428,7 +435,7 @@ void data_image_to_code_table(long** data_image_ptr, CodeTable* codetable, long*
 	CodeTableEntry* code_table_line = malloc(sizeof(CodeTableEntry));
 	for (; i < *DC; i++) {
 		code_table_line->address = (*IC);
-		code_table_line->code = decimalToBin(data_image_ptr[i]);
+		code_table_line->code = decimalToBin((int)data_image_ptr[i]);
 		add_to_code_table(codetable, *code_table_line);
 		(*IC)++;
 	}

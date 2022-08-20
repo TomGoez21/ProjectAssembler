@@ -114,7 +114,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions); _CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -144,24 +144,24 @@
     <ClCompile Include="label_check.c" />
     <ClCompile Include="macro.c" />
     <ClCompile Include="main.c" />
-    <ClCompile Include="orders.c" />
     <ClCompile Include="string_utils.c" />
     <ClCompile Include="symbol_conversion.c" />
     <ClCompile Include="symbol_table.c" />
     <ClCompile Include="utils.c" />
     <ClCompile Include="write_to_file.c" />
+    <ClCompile Include="project_processor.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="code_parse.h" />
     <ClInclude Include="directives.h" />
     <ClInclude Include="label_check.h" />
     <ClInclude Include="macro.h" />
-    <ClInclude Include="orders.h" />
     <ClInclude Include="string_utils.h" />
     <ClInclude Include="symbol_conversion.h" />
     <ClInclude Include="symbol_table.h" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="write_to_file.h" />
+    <ClCompile Include="project_processor.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

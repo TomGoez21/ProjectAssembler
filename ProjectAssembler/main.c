@@ -23,7 +23,6 @@ int main(int argc, char* argv[]) {
 		codetable.size = 0;
 		codetable.entries = NULL;
 		succeeded = process_file(argv[i], &symboltable, &codetable);
-		/* Line break if failed */
 		freeSymbolTable(&symboltable);
 		freeCodeTable(&codetable);
 	}

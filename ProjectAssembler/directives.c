@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include "directives.h"
 #include "utils.h"
-#pragma warning(disable : 4996)
+
 
 directive str_to_directive(char* str) {
 	if (!strcmp(str, "data")) {
@@ -71,7 +71,7 @@ void string_handler(line_details line, char* begin, long *DC, long** data_image_
 
 	/*insert data to the data list*/
 	while (*begin && *begin != '"') {
-		data_image_ptr[*DC] = *begin;
+		data_image_ptr[*DC] = (long*)*begin;
 		begin++;
 		(*DC)++;
 	}
@@ -99,7 +99,7 @@ void data_handler(line_details line, char* begin, long *DC, long** data_image_pt
 	while (isspace(*begin)) { begin++; }
 
 	/* Get first argument from the string input */
-	if (sscanf(begin, "%d%n", &num, &ilen) <= 0) {
+	if (sscanf(begin, "%ld%n", &num, &ilen) <= 0) {
 		printf_line_error(line, "expected number after .data");
 		set_error(true);
 		return;
@@ -113,7 +113,7 @@ void data_handler(line_details line, char* begin, long *DC, long** data_image_pt
 		return;
 	}
 	/* Insert the data into data_image */
-	data_image_ptr[*DC] = num;
+	data_image_ptr[*DC] = (long*)num;
 	(*DC)++;
 
 	/* for each argument the the .data directive, add it to data_image */
@@ -123,7 +123,7 @@ void data_handler(line_details line, char* begin, long *DC, long** data_image_pt
 		while (isspace(*begin)) { begin++; }
 
 		/* get argument */
-		if (sscanf(begin, "%d%n", &num, &ilen) <= 0) {
+		if (sscanf(begin, "%ld%n", &num, &ilen) <= 0) {
 			printf_line_error(line, "Expected a number after comma");
 			set_error(true);
 			return;
@@ -140,7 +140,7 @@ void data_handler(line_details line, char* begin, long *DC, long** data_image_pt
 		}
 
 		/* Insert the data into data_image */
-		data_image_ptr[*DC] = num;
+		data_image_ptr[*DC] = (long*)num;
 		(*DC)++;
 
 		while (isspace(*begin)) { begin++; }
@@ -168,7 +168,7 @@ void struct_handler(line_details line, char* begin, long *DC, long** data_image_
 		return;
 	}
 	/* Insert the data into data_image*/
-	data_image_ptr[*DC] = num;
+	data_image_ptr[*DC] = (long*)num;
 	(*DC)++;
 
 
