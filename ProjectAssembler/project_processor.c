@@ -335,6 +335,7 @@ char* preAssemblerProccess(char* filename)
 	FILE* fd;
 	FILE* newFp;
 	macroList* list;
+	line_details ld;
 	char line[MAX_LINE_LENGTH];
 	char currWord[MAX_LINE_LENGTH];
 	int macroFlag = 0;
@@ -345,6 +346,7 @@ char* preAssemblerProccess(char* filename)
 	macro* foundedMacro;
 	char* newFile = (char*)calloc(MAX_LINE_LENGTH * sizeof(char), sizeof(char*));
 	char* input_file;
+	int line_count = 0;
 	strcpy(newFile, "");
 	strcpy(macroBuffer, "");
 	strcpy(leadingWhiteSpace, "");
@@ -352,13 +354,21 @@ char* preAssemblerProccess(char* filename)
 	if (!(fd = fopen(input_file, "r")))
 	{
 		fprintf(stderr, "cannot  open file\n");
-		exit(-10);
+		exit(ERROR_FILE_NOT_FOUND);
 	}
 	list = createNewMacroList();
 	while (!feof(fd))
 	{
+		line_count++;
 		if (fgets(line, MAX_LINE_LENGTH, fd) != NULL)
 		{
+			if (strchr(line, '\n') == NULL && strlen(line) > 80) {
+				ld.file_name = input_file;
+				ld.line = line;
+				ld.line_number = line_count;
+				printf_line_error(ld, "line is too long: %s", line);
+				exit(ERROR_LINE_SIZE_TO_BIG);
+			}
 			strcpy(currWord, getFirstWordFromALine(line, currWord));
 			if (macroFlag)
 			{
